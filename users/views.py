@@ -16,8 +16,6 @@ import hashlib
 
 @api_view(['POST'])
 def register(request):
-    
-    
     try:
         salt = secrets.token_hex(10)
         salted_password = salt + request.data['password']
