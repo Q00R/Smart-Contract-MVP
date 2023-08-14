@@ -8,3 +8,13 @@ from rest_framework.permissions import IsAuthenticated
 
 #import meen .serializers w models     @api_view(['GET'])
 #@permission_classes([IsAuthenticated]) for jwt 
+
+
+@api_view(['GET'])
+def endpoints(request):
+    data = ['hello']
+    return Response(data)
+
+
+
+
