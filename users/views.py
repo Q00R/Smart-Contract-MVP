@@ -1,5 +1,8 @@
 from django.shortcuts import render , redirect
 from django.http import JsonResponse
+from django.utils import timezone 
+from datetime import timedelta
+
 
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.views import APIView
@@ -60,28 +63,46 @@ def activate(request ,pk):
     
     send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
+    itime = timezone.now()
+    
     print(recipient_list)
     request.session['user_otp'] = otp
+    request.session['itimeOTP'] = itime
     request.session['verified_email'] = user.email
     
     return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
 
 @api_view(['POST']) 
 def verify_otp(request):
+#first save the time from when the otp is sent
+#second check
     
     user_otps = request.data['otp']
+    #user_otps = ["otp":request.data['otp'] , "Time":timezone.now]
+    itiem =request.session.get("itimeOTP")
+    temp = {
+        "otp":user_otps,
+        "time": itiem
+    }
+    
+    new_time = temp["time"] + timedelta(minutes=1)
+
     
     stored_otp = request.session.get('user_otp')
     verified_email = request.session.get('verified_email')
     user = Users.objects.get(email= verified_email)
     
-    print('user_otps ',user_otps)
+    print('user_otps ',temp["time"])
     print('stored_otp ',stored_otp)
     
+    #if timezone.now 
     
-    if user_otps == stored_otp:
+    if timezone.now() <= new_time and temp["otp"] == stored_otp:
+        print("enter time:", timezone.now() , "timedelta:" , new_time )
         user.is_activated = True
         user.save()
+        request.session['user_otp'] = None
+        temp = None
         return Response({'message': 'Email is Activated'})
     else:
         return Response({'error': 'OTP is not valid'})
