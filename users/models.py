@@ -1,11 +1,13 @@
 from django.db import models
 from django.utils import timezone 
+from django import forms
+
 #from django.contrib.auth.models import User
 
 class Users(models.Model):
     user_id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
-    password = models.TextField()
+    password = forms.CharField(widget=forms.PasswordInput)
     username = models.TextField(unique=True,blank=True, null=True)
     is_activated = models.BooleanField(default=False)
     nid = models.TextField(unique=True,blank=True, null=True)
