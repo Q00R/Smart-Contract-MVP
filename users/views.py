@@ -10,12 +10,15 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from .models import Users , Documents ,Document_shared
+from .models import Users , Documents ,Document_shared, OneTimePassword
 from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer 
 
 import secrets
 import hashlib
 import random
+import pyrebase
+
+
 
 from django.core.mail import send_mail
 from DocuSign import settings
@@ -23,6 +26,20 @@ from DocuSign import settings
 #import meen .serializers w models     @api_view(['GET'])
 #@permission_classes([IsAuthenticated]) for jwt 
 
+
+config ={
+    "apiKey": "AIzaSyD3WJWYnQ-tb2zettIQOKUMb6Ti9iYqfr0",
+    "authDomain": "test-16f17.firebaseapp.com",
+    "databaseURL": "https://test-16f17-default-rtdb.firebaseio.com",
+    "projectId": "test-16f17",
+    "storageBucket": "test-16f17.appspot.com",
+    "messagingSenderId": "117239109614",
+    "appId": "1:117239109614:web:c1186a8a8feb5c396860ff",
+}
+
+firebase = pyrebase.initialize_app(config)
+authe = firebase.auth()
+database = firebase.database()
 
 @api_view(['POST'])
 def register(request):
@@ -54,21 +71,20 @@ def activate(request ,pk):
     if not user.email:
         return Response({'error': 'Email not found'})
     
-    otp = str(random.randint(1000, 9999))
+    otp = OneTimePassword.objects.create(user_id = user.user_id)
+    otp.generate_OTP()
     
     subject = 'Your OTP for Email Verification'
-    message = f'Your OTP is: {otp}'
+    message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
     print(recipient_list)
     
     send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
-    itime = timezone.now()
     
-    print(recipient_list)
-    request.session['user_otp'] = otp
-    request.session['itimeOTP'] = itime
-    request.session['verified_email'] = user.email
+    
+  
+    
     
     return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
 
@@ -76,35 +92,17 @@ def activate(request ,pk):
 def verify_otp(request):
 #first save the time from when the otp is sent
 #second check
-    
     user_otps = request.data['otp']
-    #user_otps = ["otp":request.data['otp'] , "Time":timezone.now]
-    itiem =request.session.get("itimeOTP")
-    temp = {
-        "otp":user_otps,
-        "time": itiem
-    }
-    
-    new_time = temp["time"] + timedelta(minutes=1)
-
-    
-    stored_otp = request.session.get('user_otp')
     verified_email = request.session.get('verified_email')
     user = Users.objects.get(email= verified_email)
-    
-    print('user_otps ',temp["time"])
-    print('stored_otp ',stored_otp)
+    saved_otp = OneTimePassword.objects.get(user_id=user.user_id)
     
     #if timezone.now 
-    
-    if timezone.now() <= new_time and temp["otp"] == stored_otp:
-        print("enter time:", timezone.now() , "timedelta:" , new_time )
+    if saved_otp.otp == user_otps:
+        if saved_otp.is_expired():
+            return Response("OTP is not valid, Please regenerate another OTP")
         user.is_activated = True
         user.save()
-        request.session['user_otp'] = None
-        temp = None
         return Response({'message': 'Email is Activated'})
-    else:
-        return Response({'error': 'OTP is not valid'})
-    
+        
     #------------------------------------------

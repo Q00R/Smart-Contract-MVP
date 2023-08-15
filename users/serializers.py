@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer , SerializerMethodField
 from rest_framework import serializers
-from .models import Users , Documents , Document_shared
+from .models import Users , Documents , Document_shared, OneTimePassword
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -18,4 +18,9 @@ class DocumentSerializer(serializers.ModelSerializer):
 class DocumentSharedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document_shared
+        fields = '__all__'
+
+class OneTimePasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OneTimePassword
         fields = '__all__'

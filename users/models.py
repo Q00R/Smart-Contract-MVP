@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils import timezone 
 from django import forms
+from datetime import timedelta
 
+import random
 #from django.contrib.auth.models import User
 
 class Users(models.Model):
@@ -45,3 +47,16 @@ class Document_shared(models.Model):
             models.UniqueConstraint(fields=['doc_id', 'owner_id'], name='document_unique')
         ]
 
+class OneTimePassword(models.Model):
+    user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
+    otp = models.CharField(4)
+    timestamp = models.DateTimeField(default=timezone.now())
+
+    def generate_OTP(self):
+        self.otp = str(random.randint(1000, 9999))
+    
+    def is_expired(self):
+        new_time = self.timestamp + timedelta(minutes=2)
+        if timezone.now <= new_time:
+            return False
+        return True
