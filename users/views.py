@@ -184,3 +184,28 @@ def reset_password(request,pk):
     Users.objects.filter(user_id=pk).update(password=hashed_password)
 
     return Response({'message': 'Password Reset'})
+
+
+@api_view(['POST'])
+def login(request):
+    
+    email = request.data.get('email')
+    password = request.data.get('password')
+    
+    if email is None or password is None:
+        return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        user = Users.objects.get(email=email) 
+    except Users.DoesNotExist:
+        return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    salt = user.salt
+    salted_password = salt + password
+    hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+    
+    if hashed_password == user.password:
+        return Response("Login successful")
+    else:
+        return Response("incorrect password, please try again.")
+    
