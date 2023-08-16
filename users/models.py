@@ -62,6 +62,6 @@ class OneTimePassword(models.Model):
     
     def is_expired(self):
         new_time = self.timestamp + timedelta(minutes=2)
-        if timezone.now <= new_time:
+        if timezone.now() <= new_time:
             return False
         return True

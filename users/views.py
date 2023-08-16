@@ -40,6 +40,7 @@ from DocuSign import settings
 # authe = firebase.auth()
 # database = firebase.database()
 
+
 @api_view(['POST'])
 def register(request):
     try:
@@ -56,6 +57,7 @@ def register(request):
             phone_number = request.data['phone number'],
             salt = salt
             )
+        print("aloo")
         serializers = UserSerializer(user)
         return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
         
@@ -64,29 +66,36 @@ def register(request):
 
 #new ---------------------------
 @api_view(['GET'])    
-def activate(request ,pk):
+def activate(request, pk):
+    try:
+        user = Users.objects.get(user_id=pk)
+    except Users.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    user = Users.objects.get(user_id= pk)
+    try:
+        otpfound = OneTimePassword.objects.get(user_id = user.user_id)
+        otpfound.delete()
+    except OneTimePassword.DoesNotExist:
+        pass  # No OTP found, nothing to delete
+    
     if not user.email:
-        return Response({'error': 'Email not found'})
+        return Response({'error': 'Email not found'}, status=status.HTTP_400_BAD_REQUEST)
     
     otp = OneTimePassword.objects.create(user_id = user)
     otp.generate_OTP()
     otp.save()
     
-    print(otp.otp)
-    
     subject = 'Your OTP for Email Verification'
     message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
-    print(recipient_list)
     
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     email.send()
     
-    print(recipient_list)
-    
     return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
+
+
+
 
 @api_view(['POST']) 
 def verify_otp(request):
@@ -97,7 +106,7 @@ def verify_otp(request):
     verified_email = request.session.get('verified_email')
     user = Users.objects.get(email= verified_email)
     saved_otp = OneTimePassword.objects.get(user_id=user.user_id)
-    
+  
     #if timezone.now 
     if saved_otp.otp == user_otps:
         if saved_otp.is_expired():
