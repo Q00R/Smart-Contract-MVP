@@ -1,23 +1,28 @@
 from django.db import models
 from django.utils import timezone 
 from django import forms
+import random
 from datetime import timedelta
 
-import random
 #from django.contrib.auth.models import User
 
 class Users(models.Model):
     user_id = models.AutoField(primary_key=True)
-    email = models.EmailField(unique=True)
-    password = forms.CharField(widget=forms.PasswordInput)
+    email = models.TextField(blank=False, null=True) #models.EmailField(unique=True)
+    password =  models.TextField(blank=False, null=True)     #forms.CharField(widget=forms.PasswordInput)
     username = models.TextField(unique=True,blank=True, null=True)
     is_activated = models.BooleanField(default=False)
     nid = models.TextField(unique=True,blank=True, null=True)
     phone_number = models.TextField(unique=True,blank=True, null=True)
     salt = models.TextField(blank=True, null=False)
+    
 
     class Meta:
         db_table = 'users'
+        
+        
+    def __str__(self):
+        return self.username
         
         
 
@@ -50,7 +55,7 @@ class Document_shared(models.Model):
 class OneTimePassword(models.Model):
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
     otp = models.CharField(4)
-    timestamp = models.DateTimeField(default=timezone.now())
+    timestamp = models.DateTimeField(default=timezone.now)
 
     def generate_OTP(self):
         self.otp = str(random.randint(1000, 9999))
