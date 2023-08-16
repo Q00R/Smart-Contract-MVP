@@ -166,3 +166,15 @@ def EditAccount(request, pk):
     return Response({'message': 'Account updated'}) 
     
     
+@api_view['PUT']
+def reset_password(request,pk):
+    try:
+        user = Users.objects.get(user_id=pk)
+    except Users.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    updated_pass = request.data.get('password')
+
+    Users.objects.filter(user_id=pk).update(password=updated_pass)
+
+    return Response({'message': 'Password Reset'})
