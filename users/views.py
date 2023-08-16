@@ -146,7 +146,6 @@ def deactivate(request, pk):
     return Response({'message': 'Account is deacivated'})
 
 
-
 @api_view(['PUT'])
 def EditAccount(request, pk):
     try:
@@ -166,15 +165,22 @@ def EditAccount(request, pk):
     return Response({'message': 'Account updated'}) 
     
     
-@api_view['PUT']
+@api_view(['PUT'])
 def reset_password(request,pk):
     try:
         user = Users.objects.get(user_id=pk)
     except Users.DoesNotExist:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    updated_pass = request.data.get('password')
-
-    Users.objects.filter(user_id=pk).update(password=updated_pass)
+    updated_pass = request.data.get('password') #request.data['password']
+    
+    if updated_pass is None:
+        return Response("Please provide the NEW Password.")
+    
+    salt = user.salt
+    salted_password = salt + updated_pass   
+    hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+    
+    Users.objects.filter(user_id=pk).update(password=hashed_password)
 
     return Response({'message': 'Password Reset'})
