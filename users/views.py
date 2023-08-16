@@ -17,7 +17,7 @@ import secrets
 import hashlib
 import random
 
-
+from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
 from DocuSign import settings
@@ -57,12 +57,11 @@ def register(request):
             phone_number = request.data['phone number'],
             salt = salt
             )
-        print("aloo")
         serializers = UserSerializer(user)
         return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
         
-    except:
-        return Response({'error': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])    
 def activate(request, pk):
@@ -94,27 +93,76 @@ def activate(request, pk):
     return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
 
 
-
-
-@api_view(['POST']) 
-def verify_otp(request):
-#first save the time from when the otp is sent
-#second check
-    user_otps = request.data['otp']
+@api_view(['PUT'])
+def verify_otp(request, pk):
     
-    verified_email = request.session.get('verified_email')
-    user = Users.objects.get(email= verified_email)
-    saved_otp = OneTimePassword.objects.get(user_id=user.user_id)
-  
-    #if timezone.now 
-    if saved_otp.otp == user_otps:
-        if saved_otp.is_expired():
-            saved_otp.delete()
-            return Response("OTP is not valid, Please regenerate another OTP")
-        user.is_activated = True
-        user.save()
+    user_otps = request.data.get('otp')
+    if user_otps is None:
+        return Response("Please provide the OTP.")
+    
+    try:
+        user = Users.objects.get(user_id=pk)
+    except Users.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if user.is_activated:
+        return Response("User is already activated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    if user_otps is None:
+        return Response("Please provide the OTP.")
+    verified_email = user.email
+    user = get_object_or_404(Users, email=verified_email)
+    
+    try:
+        saved_otp = OneTimePassword.objects.get(user_id = user.user_id)
+    except OneTimePassword.DoesNotExist:
+        return Response("OTP not found. Please request a new OTP.")
+    
+    if saved_otp.otp != user_otps:
+        return Response("Invalid OTP")
+    
+    if saved_otp.is_expired():
         saved_otp.delete()
+        return Response("OTP is expired. Please regenerate another OTP.")
+    
+    user.is_activated = True
+    user.save()
+    saved_otp.delete()
+    
+    return Response({'message': 'Email is Activated'})
+
+@api_view(['PUT'])
+def deactivate(request, pk):
+    try:
+        user = Users.objects.get(user_id=pk)
+    except Users.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not user.is_activated:
+        return Response("User is already deactivated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    Users.objects.filter(user_id=pk).update(is_activated=False)
+
+    return Response({'message': 'Account is deacivated'})
+
+
+
+@api_view(['PUT'])
+def EditAccount(request, pk):
+    try:
+        user = Users.objects.get(user_id=pk)
+    except Users.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    firstname = request.data.get('firstname')
+    lastname = request.data.get('lastname')
+    username = request.data.get('username')
+    #email =  request.data.get('email')
+    phone_number = request.data.get('phone_number')
+    
+    Users.objects.filter(user_id=pk).update(firstname=firstname,username = username, lastname=lastname, phone_number=phone_number)
+    
         
-        return Response({'message': 'Email is Activated'})
-        
-    #------------------------------------------
+    return Response({'message': 'Account updated'}) 
+    
+    
