@@ -10,6 +10,5 @@ urlpatterns = [
     path('api/users/<str:pk>/deactivate/' , views.deactivate),
     path('api/users/<str:pk>/' ,views.EditAccount),
     path('api/users/<str:pk>/reset_password/' ,views.reset_password),
-    
-    
+    path('api/users/<str:pk>/upload/' ,views.upload_pdf),
 ]
