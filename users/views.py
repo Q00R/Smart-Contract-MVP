@@ -54,8 +54,10 @@ def register(request):
         user = Users.objects.create(
             email =  request.data['email'] ,
             password = hashed_password ,
+            firstname = request.data['firstname'],
+            lastname = request.data['lastname'],
             is_activated = False ,
-            username = request.data['username'],
+            #username = request.data['username'],
             nid = request.data['nid'],
             phone_number = request.data['phone number'],
             salt = salt
@@ -87,14 +89,18 @@ def activate(request, pk):
     otp.generate_OTP()
     otp.save()
     
+    
     subject = 'Your OTP for Email Verification'
     message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
-    
+    print("user.email: " , user.email)
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
-    email.send()
     
-    return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
+    try:
+        email.send() 
+        return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # verify acc with otp
 @api_view(['PUT'])
@@ -161,13 +167,13 @@ def EditAccount(request, pk):
     
     firstname = request.data.get('firstname')
     lastname = request.data.get('lastname')
-    username = request.data.get('username')
+    #username = request.data.get('username')
     #email =  request.data.get('email')
     phone_number = request.data.get('phone_number')
    
     # add some defensive programming
     
-    Users.objects.filter(user_id=pk).update(firstname=firstname,username = username, lastname=lastname, phone_number=phone_number)
+    Users.objects.filter(user_id=pk).update(firstname=firstname, lastname=lastname, phone_number=phone_number)
     
         
     return Response({'message': 'Account updated'}) 
