@@ -35,6 +35,7 @@ class Documents(models.Model):
     document_file = models.FileField(upload_to='documents/', null=True ,blank=True)
     timestamp = models.DateTimeField(default=timezone.now)
     is_completed = models.BooleanField()
+    document_file = models.FileField(upload_to='documents/', null=True) 
 
     class Meta:
         db_table = 'documents'

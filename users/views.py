@@ -173,7 +173,7 @@ def EditAccount(request, pk):
     return Response({'message': 'Account updated'}) 
     
 
- # reset password
+# reset password
 @api_view(['PUT'])
 def reset_password(request,pk):
     try:
@@ -223,9 +223,6 @@ def login(request):
     else:
         return Response("incorrect password, please try again.")
     
-    
-    
-#Compressing pdf is missing 
 @api_view(['POST'])
 #@parser_classes([FileUploadParser])
 def upload_pdf(request, pk):
@@ -234,7 +231,7 @@ def upload_pdf(request, pk):
     except Users.DoesNotExist:
         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
     
-    print("request.data: ", request.data)
+    #print("request.data: ", request.data)
     if 'document_file' in request.data:
         pdf_file = request.data['document_file']
         
