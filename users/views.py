@@ -1,14 +1,17 @@
+from PyPDF2 import PdfFileReader
 from django.shortcuts import render , redirect
 from django.http import JsonResponse
 from django.utils import timezone 
 from datetime import timedelta
 
 
-from rest_framework.decorators import api_view , permission_classes
+from rest_framework.decorators import api_view , permission_classes, parser_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.parsers import FileUploadParser
+
 
 from .models import Users , Documents ,Document_shared, OneTimePassword
 from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer 
@@ -40,7 +43,7 @@ from DocuSign import settings
 # authe = firebase.auth()
 # database = firebase.database()
 
-
+# register account
 @api_view(['POST'])
 def register(request):
     try:
@@ -63,6 +66,7 @@ def register(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# send mail with activation
 @api_view(['GET'])    
 def activate(request, pk):
     try:
@@ -92,7 +96,7 @@ def activate(request, pk):
     
     return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
 
-
+# verify acc with otp
 @api_view(['PUT'])
 def verify_otp(request, pk):
     
@@ -131,6 +135,7 @@ def verify_otp(request, pk):
     
     return Response({'message': 'Email is Activated'})
 
+# deactivate account
 @api_view(['PUT'])
 def deactivate(request, pk):
     try:
@@ -146,6 +151,7 @@ def deactivate(request, pk):
     return Response({'message': 'Account is deacivated'})
 
 
+# edit account
 @api_view(['PUT'])
 def EditAccount(request, pk):
     try:
@@ -158,13 +164,16 @@ def EditAccount(request, pk):
     username = request.data.get('username')
     #email =  request.data.get('email')
     phone_number = request.data.get('phone_number')
+   
+    # add some defensive programming
     
     Users.objects.filter(user_id=pk).update(firstname=firstname,username = username, lastname=lastname, phone_number=phone_number)
     
         
     return Response({'message': 'Account updated'}) 
     
-    
+
+ # reset password
 @api_view(['PUT'])
 def reset_password(request,pk):
     try:
@@ -186,6 +195,7 @@ def reset_password(request,pk):
     return Response({'message': 'Password Reset'})
 
 
+# login
 @api_view(['POST'])
 def login(request):
     
@@ -193,7 +203,11 @@ def login(request):
     password = request.data.get('password')
     
     if email is None or password is None:
-        return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+        if email is None:
+            return Response({'error': 'Please Enter Email '}, status=status.HTTP_412_PRECONDITION_FAILED)
+        elif password is None:
+            return Response({'error': 'Please Enter Password '}, status=status.HTTP_412_PRECONDITION_FAILED)
+
     
     try:
         user = Users.objects.get(email=email) 
@@ -209,3 +223,36 @@ def login(request):
     else:
         return Response("incorrect password, please try again.")
     
+    
+    
+#Compressing pdf is missing 
+@api_view(['POST'])
+#@parser_classes([FileUploadParser])
+def upload_pdf(request, pk):
+    try:
+        user = Users.objects.get(user_id=pk)
+    except Users.DoesNotExist:
+        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    print("request.data: ", request.data)
+    if 'document_file' in request.data:
+        pdf_file = request.data['document_file']
+        
+        pdf_content = pdf_file.read()
+        # Calculate the hash of the PDF file
+        pdf_hash = calculate_pdf_hash(pdf_content)
+        
+        document = Documents(user=user, document_file=pdf_file, document_hash=pdf_hash, is_completed=False)
+        document.save()
+        return Response({'message': 'PDF uploaded successfully.'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def calculate_pdf_hash(pdf_file):
+    
+    sha256_hash = hashlib.sha256()
+    
+    sha256_hash.update(pdf_file)
+    
+    return sha256_hash.hexdigest()

@@ -32,6 +32,7 @@ class Documents(models.Model):
     document_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     document_hash = models.TextField()
+    document_file = models.FileField(upload_to='documents/', null=True ,blank=True)
     timestamp = models.DateTimeField(default=timezone.now)
     is_completed = models.BooleanField()
 
