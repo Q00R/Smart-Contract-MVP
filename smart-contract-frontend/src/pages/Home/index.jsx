@@ -3,7 +3,9 @@ import React from "react";
 const Home = () => {
     return (
         <div>
-            Home
+
+            <h1 className="text-2xl font-extrabold">Home</h1>
+
         </div>
     );
 };
