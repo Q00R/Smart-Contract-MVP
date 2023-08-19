@@ -1,47 +1,28 @@
-from PyPDF2 import PdfFileReader
-from django.shortcuts import render , redirect
-from django.http import JsonResponse
-from django.utils import timezone 
-from datetime import timedelta
 
+from django.shortcuts import render , redirect
 
 from rest_framework.decorators import api_view , permission_classes, parser_classes
-from rest_framework.views import APIView
+
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework.parsers import FileUploadParser
-
 
 from .models import Users , Documents ,Document_shared, OneTimePassword
 from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer 
 
 import secrets
 import hashlib
-import random
+
+#------new
+from io import BytesIO
+from django.core.files.base import ContentFile
+import zipfile
+#----------
 
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
-from django.core.mail import send_mail
 from DocuSign import settings
 
-#import meen .serializers w models     @api_view(['GET'])
-#@permission_classes([IsAuthenticated]) for jwt 
-
-
-# config ={
-#     "apiKey": "AIzaSyD3WJWYnQ-tb2zettIQOKUMb6Ti9iYqfr0",
-#     "authDomain": "test-16f17.firebaseapp.com",
-#     "databaseURL": "https://test-16f17-default-rtdb.firebaseio.com",
-#     "projectId": "test-16f17",
-#     "storageBucket": "test-16f17.appspot.com",
-#     "messagingSenderId": "117239109614",
-#     "appId": "1:117239109614:web:c1186a8a8feb5c396860ff",
-# }
-
-# firebase = pyrebase.initialize_app(config)
-# authe = firebase.auth()
-# database = firebase.database()
 
 # register account
 @api_view(['POST'])
@@ -213,7 +194,6 @@ def login(request):
             return Response({'error': 'Please Enter Email '}, status=status.HTTP_412_PRECONDITION_FAILED)
         elif password is None:
             return Response({'error': 'Please Enter Password '}, status=status.HTTP_412_PRECONDITION_FAILED)
-
     
     try:
         user = Users.objects.get(email=email) 
@@ -228,28 +208,37 @@ def login(request):
         return Response("Login successful")
     else:
         return Response("incorrect password, please try again.")
-    
+
+
 @api_view(['POST'])
-#@parser_classes([FileUploadParser])
 def upload_pdf(request, pk):
     try:
         user = Users.objects.get(user_id=pk)
     except Users.DoesNotExist:
         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
     
-    #print("request.data: ", request.data)
     if 'document_file' in request.data:
         pdf_file = request.data['document_file']
-        
         pdf_content = pdf_file.read()
-        # Calculate the hash of the PDF file
         pdf_hash = calculate_pdf_hash(pdf_content)
         
-        document = Documents(user=user, document_file=pdf_file, document_hash=pdf_hash, is_completed=False)
+        zip = compress_pdf_to_zip(pdf_content, pdf_file.name)
+        # Create a ContentFile from the compressed content
+        compressed_pdf = ContentFile(zip, name=f'{pdf_file.name}.zip')
+        
+        document = Documents(user=user, document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
         document.save()
-        return Response({'message': 'PDF uploaded successfully.'}, status=status.HTTP_201_CREATED)
+        
+        return Response({'message': 'PDF uploaded and compressed successfully.'}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def compress_pdf_to_zip(pdf_content, pdf_name):
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        zipf.writestr(pdf_name, pdf_content)
+    return zip_buffer.getvalue()
 
 
 def calculate_pdf_hash(pdf_file):
@@ -259,3 +248,4 @@ def calculate_pdf_hash(pdf_file):
     sha256_hash.update(pdf_file)
     
     return sha256_hash.hexdigest()
+
