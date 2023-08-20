@@ -1,13 +1,13 @@
 import React from "react";
 
-const Home = () => {
+const index = () => {
     return (
-        <div>
+        <div className="flex flex-col">
 
-            <h1 className="text-2xl font-extrabold">Home</h1>
+            <h1 className="text-2xl self-center">Home content here</h1>
 
         </div>
     );
 };
 
-export default Home;
+export default index;
