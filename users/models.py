@@ -34,14 +34,16 @@ class Documents(models.Model):
     document_hash = models.TextField()
     document_file = models.FileField(upload_to='documents/', null=True ,blank=True)
     timestamp = models.DateTimeField(default=timezone.now)
-    is_completed = models.BooleanField()
-    document_file = models.FileField(upload_to='documents/', null=True) 
+    is_completed = models.BooleanField() 
 
     class Meta:
         db_table = 'documents'
         constraints = [
             models.UniqueConstraint(fields=['document_id', 'user'], name='document_user_unique')
         ]
+    def __str__(self):
+        return f"Document {self.document_id}"    
+    
 
 
 

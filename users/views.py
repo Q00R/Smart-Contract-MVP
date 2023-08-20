@@ -1,4 +1,5 @@
 
+import json
 from django.shortcuts import render , redirect
 
 from rest_framework.decorators import api_view , permission_classes, parser_classes
@@ -17,6 +18,7 @@ import hashlib
 from io import BytesIO
 from django.core.files.base import ContentFile
 import zipfile
+from django.http import FileResponse
 #----------
 
 from django.shortcuts import get_object_or_404
@@ -232,6 +234,48 @@ def upload_pdf(request, pk):
         return Response({'message': 'PDF uploaded and compressed successfully.'}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET'])
+def get_document(request, pk):
+    try:
+        document = Documents.objects.get(document_id=pk)
+    except Documents.DoesNotExist:
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+    zip_buffer = BytesIO(document.document_file.read())
+    with zipfile.ZipFile(zip_buffer, 'r') as zipf:
+        zip_file_contents = zipf.namelist()
+        
+        pdf_filename = None
+        for content_filename in zip_file_contents:
+            if content_filename.endswith('.pdf'):
+                pdf_filename = content_filename
+                break
+            
+            if not pdf_filename:
+                return Response({'message': 'PDF file not found in the ZIP.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        pdf_content = zipf.read(pdf_filename)
+        
+    response = FileResponse(BytesIO(pdf_content), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+    
+    return response
+
+@api_view(['GET'])
+def get_document_details(request, pk):
+    try:
+        document = Documents.objects.get(document_id=pk)
+    except Documents.DoesNotExist:
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    response_data = {
+            'timestamp': document.timestamp,
+            'document_hash': document.document_hash,
+        }
+    return Response(response_data)
 
 
 def compress_pdf_to_zip(pdf_content, pdf_name):

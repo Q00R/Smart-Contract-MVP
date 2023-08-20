@@ -11,5 +11,8 @@ urlpatterns = [
     path('api/users/<str:pk>/deactivate/' , views.deactivate),
     path('api/users/<str:pk>/' ,views.EditAccount),
     path('api/users/<str:pk>/reset_password/' ,views.reset_password),
-    path('api/users/<str:pk>/upload/' ,views.upload_pdf),
+    path('api/documents/<str:pk>/upload/' ,views.upload_pdf),
+    path('api/documents/<str:pk>/retrieve/' ,views.get_document),
+    path('api/documents/<str:pk>/retrieve_details/' ,views.get_document_details),
 ]
+
