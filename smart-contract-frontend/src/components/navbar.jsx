@@ -2,6 +2,7 @@ import React from 'react'
 import ToggleDarkImage from "../Assets/ToggleDark.png";
 import ToggleLightImage from "../Assets/ToggleLight.png"
 import logo from "../Assets/logo.png"
+import userIcon from "../Assets/user.png"
 
 function toggleMode() {
     //toggle dark mode and light mode
@@ -42,13 +43,15 @@ const navbar = () => {
 
             <div className="navbar bg-base-100">
                 <div className="navbar-start">
-                    <a href="/" className="btn btn-ghost normal-case text-xl">
+                    <a href="/" className="normal-case text-xl">
                         <img src={logo} className='w-14 h-14' />
                     </a>
                 </div>
             </div>
             <div className="navbar-end">
-                <a className="btn mx-2" href='/login'>Login</a>
+                <a className="btn btn-circle btn-accent mx-2" href='/login'>
+                    <img src={userIcon} className='w-6 h-6' />
+                </a>
                 <button
                     id="toggleMode"
                     onClick={toggleMode}
