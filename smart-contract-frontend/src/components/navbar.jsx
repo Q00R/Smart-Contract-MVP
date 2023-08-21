@@ -1,7 +1,7 @@
 import React from 'react'
 import ToggleDarkImage from "../Assets/ToggleDark.png";
 import ToggleLightImage from "../Assets/ToggleLight.png"
-import logo from "../Assets/logo.jpeg"
+import logo from "../Assets/logo.png"
 
 function toggleMode() {
     //toggle dark mode and light mode

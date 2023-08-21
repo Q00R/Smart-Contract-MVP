@@ -2,7 +2,7 @@ import React from 'react'
 import Header from '../../components/header'
 import Login from '../../components/login'
 
-import logo from '../../Assets/logo.jpeg'
+import logo from '../../Assets/logo.png'
 
 const index = () => {
     return (
