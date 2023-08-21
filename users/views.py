@@ -293,3 +293,25 @@ def calculate_pdf_hash(pdf_file):
     
     return sha256_hash.hexdigest()
 
+@api_view(['GET'])
+def documents_list(request, pk):
+    try:
+        user_documents = Documents.objects.filter(user=pk)
+        shared_documents = Document_shared.objects.filter(
+            owner_id=pk
+        ) | Document_shared.objects.filter(parties_id=pk)
+        
+        user_documents_serializer = DocumentSerializer(user_documents, many=True)
+        shared_documents_serializer = DocumentSharedSerializer(shared_documents, many=True)
+        
+        response_data = {
+            "user_documents": user_documents_serializer.data,
+            "shared_documents": shared_documents_serializer.data
+        }
+        
+        return Response(response_data)
+    except (Documents.DoesNotExist, Document_shared.DoesNotExist):
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+

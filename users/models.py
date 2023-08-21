@@ -5,7 +5,7 @@ import random
 from datetime import timedelta
 
 #from django.contrib.auth.models import User
-
+#generate_key_pair generate public and private key in user model and the two fields 
 class Users(models.Model):
     user_id = models.AutoField(primary_key=True)
     firstname = models.CharField(max_length=250 , blank=False, null=True)
@@ -24,10 +24,10 @@ class Users(models.Model):
         
         
     def __str__(self):
-        return self.email
+        return self.firstname
         
         
-
+#add signature field to sign the Document with private key of owner (sign_document)
 class Documents(models.Model):
     document_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
