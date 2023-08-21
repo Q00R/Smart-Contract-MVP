@@ -48,7 +48,7 @@ const navbar = () => {
                 </div>
             </div>
             <div className="navbar-end">
-                <a className="btn btn-circle bg-white mx-2" href='/login'>
+                <a className="btn btn-circle btn-ghost mx-2" href='/login'>
                     <img src={userIcon} className='w-2/3' />
                 </a>
                 <button
