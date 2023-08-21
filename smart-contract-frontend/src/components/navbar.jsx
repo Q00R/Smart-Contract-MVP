@@ -40,7 +40,6 @@ const navbar = () => {
             }}
             className="z-50 flex items-center px-2 duration-300 navbar bg-base-100 sticky top-0 h-auto"
         >
-
             <div className="navbar bg-base-100">
                 <div className="navbar-start">
                     <a href="/" className="normal-case text-xl">
@@ -49,8 +48,8 @@ const navbar = () => {
                 </div>
             </div>
             <div className="navbar-end">
-                <a className="btn btn-circle btn-accent mx-2" href='/login'>
-                    <img src={userIcon} className='w-6 h-6' />
+                <a className="btn btn-circle bg-white mx-2" href='/login'>
+                    <img src={userIcon} className='w-2/3' />
                 </a>
                 <button
                     id="toggleMode"
