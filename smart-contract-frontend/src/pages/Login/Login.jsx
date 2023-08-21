@@ -3,7 +3,7 @@ import Header from '../../components/Header'
 import Login from '../../components/Login'
 import logo from '../../Assets/logo.png'
 
-const index = () => {
+const LoginPage = () => {
     return (
         <>
             <Header
@@ -18,4 +18,4 @@ const index = () => {
     )
 }
 
-export default index
+export default LoginPage;

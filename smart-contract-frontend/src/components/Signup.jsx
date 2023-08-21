@@ -23,6 +23,7 @@ export default function Signup() {
 
     //handle Signup API Integration here
     const createAccount = () => {
+        //talk to the django backend, create a user account
 
     }
 
