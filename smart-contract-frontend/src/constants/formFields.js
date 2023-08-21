@@ -43,6 +43,16 @@ const signupFields = [
         placeholder: "Email address"
     },
     {
+        labelText: "Phone Number",
+        labelFor: "phone-number",
+        id: "phone-number",
+        name: "phone-number",
+        type: "phone",
+        autoComplete: "phone-number",
+        isRequired: true,
+        placeholder: "Phone Number"
+    },
+    {
         labelText: "Password",
         labelFor: "password",
         id: "password",

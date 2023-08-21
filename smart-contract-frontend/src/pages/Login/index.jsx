@@ -1,7 +1,6 @@
 import React from 'react'
-import Header from '../../components/header'
-import Login from '../../components/login'
-
+import Header from '../../components/Header'
+import Login from '../../components/Login'
 import logo from '../../Assets/logo.png'
 
 const index = () => {

@@ -1,30 +1,30 @@
+import React from 'react'
 import { useState } from 'react';
-import { loginFields } from "../constants/formFields";
+import { signupFields } from "../constants/formFields"
 import FormAction from "./FormAction";
-import FormExtra from "./FormExtra";
 import Input from "./Input";
 
-const fields = loginFields;
+
+const fields = signupFields;
 let fieldsState = {};
+
 fields.forEach(field => fieldsState[field.id] = '');
 
-export default function Login() {
-    const [loginState, setLoginState] = useState(fieldsState);
+export default function Signup() {
+    const [signupState, setSignupState] = useState(fieldsState);
 
-    const handleChange = (e) => {
-        setLoginState({ ...loginState, [e.target.id]: e.target.value })
-    }
+    const handleChange = (e) => setSignupState({ ...signupState, [e.target.id]: e.target.value });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        authenticateUser();
+        console.log(signupState)
+        createAccount()
     }
 
-    //Handle Login API Integration here
-    const authenticateUser = () => {
+    //handle Signup API Integration here
+    const createAccount = () => {
 
     }
-
 
     return (
         <form className="flex flex-col mt-8 space-y-6">
@@ -34,7 +34,7 @@ export default function Login() {
                         <Input
                             key={field.id}
                             handleChange={handleChange}
-                            value={loginState[field.id]}
+                            value={signupState[field.id]}
                             labelText={field.labelText}
                             labelFor={field.labelFor}
                             id={field.id}
@@ -46,10 +46,7 @@ export default function Login() {
 
                     )
                 }
-
-
-                <FormExtra />
-                <FormAction handleSubmit={handleSubmit} text="Login" />
+                <FormAction handleSubmit={handleSubmit} text="Signup" />
             </div>
         </form>
     )
