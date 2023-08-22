@@ -21,25 +21,16 @@ export default function Signup() {
     //handle form submission
     const handleSubmit = (e) => {
 
-        const data = {
-            first_name: signupState.firstName,
-            last_name: signupState.lastName,
-            email: signupState.email,
-            phone: signupState.phone,
-            national_id: signupState.nationalId,
-            password: signupState.password,
-        }
 
-        console.log(data)
 
         //prevent the default form behaviour
-        // e.preventDefault();
+        e.preventDefault();
 
         //log the form data
-        // console.log(signupState)
+        console.log(signupState)
 
         //call the createAccount function
-        // createAccount()
+        createAccount()
     }
 
     //handle Signup API Integration here
@@ -51,33 +42,39 @@ export default function Signup() {
 
         //get the data from the form
         const data = {
-            first_name: signupState.firstName,
-            last_name: signupState.lastName,
-            email: signupState.email,
-            phone: signupState.phone,
-            national_id: signupState['national-id'],
-            password: signupState['password'],
+            "firstname": signupState['first-name'],
+            "lastname": signupState['last-name'],
+            "email": signupState['email-address'],
+            "password": signupState['phone-number'],
+            "nid": signupState['national-id'],
+            "phone number": signupState['password'],
+        }
+
+        //if password and confirm password do not match, display error message
+        if (signupState['password'] !== signupState['confirm-password']) {
+            console.log('Passwords do not match')
+            return
         }
 
         console.log(data)
 
         //make a post request to the backend
-        // fetch('http://localhost:8000/api/users/', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(data) //convert the data to a JSON string
-        // })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         console.log('Success:', data);
-        //         //redirect to login page
-        //         window.location.href = '/login'
-        //     })
-        //     .catch((error) => {
-        //         console.error('Error:', error);
-        //     });
+        fetch('http://localhost:8000/api/users/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) //convert the data to a JSON string
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                //redirect to login page
+                // window.location.href = '/login'
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     }
 
     return (
