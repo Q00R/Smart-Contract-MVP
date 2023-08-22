@@ -15,5 +15,6 @@ urlpatterns = [
     path('api/documents/<str:pk>/upload/' ,views.upload_pdf),
     path('api/documents/<str:pk>/retrieve/' ,views.get_document),
     path('api/documents/<str:pk>/retrieve_details/' ,views.get_document_details),
+    path('api/documents/<str:pk>/doclist/' ,views.documents_list),
 ]
 
