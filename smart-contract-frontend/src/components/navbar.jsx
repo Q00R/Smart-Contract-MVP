@@ -16,6 +16,7 @@ function toggleMode() {
         document.documentElement.getAttribute("data-theme") === "dark"
             ? ToggleLightImage
             : ToggleDarkImage;
+    // document.getElementById("loginIcon").classList.toggle("bg-white");
 
     localStorage.setItem(
         "theme",
@@ -34,8 +35,10 @@ const navbar = () => {
 
                 if (localStorage.getItem("theme") === "dark") {
                     document.getElementById("toggleModeIcon").src = ToggleLightImage;
+                    document.getElementById("loginIcon").className = "btn btn-circle btn-ghost border-2 mx-2 bg-white";
                 } else {
                     document.getElementById("toggleModeIcon").src = ToggleDarkImage;
+                    document.getElementById("loginIcon").className = "btn btn-circle btn-ghost border-2 mx-2";
                 }
             }}
             className="z-50 flex items-center px-2 duration-300 navbar bg-base-100 sticky top-0 h-auto"
@@ -48,7 +51,7 @@ const navbar = () => {
                 </div>
             </div>
             <div className="navbar-end">
-                <a className="btn btn-circle btn-ghost mx-2" href='/login'>
+                <a id="loginIcon" className="btn btn-circle btn-outline border-2 mx-2" href='/login'>
                     <img src={userIcon} className='w-2/3' />
                 </a>
                 <button
