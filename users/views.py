@@ -318,3 +318,28 @@ def documents_list(request, pk):
 # make an api/function to search on the parties and see if they have accepted or not before publishing
 # make another api for sending to emails for user
 # for when sending the mail put a link to accept or reject the contract
+
+
+@api_view(['PUT'])
+def reject_document(request, doc_id, user_id):
+    try:
+        docsh_id = Document_shared.objects.get(doc_id=doc_id, parties_id=user_id)
+    except Document_shared.DoesNotExist:
+        return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    docsh_id.is_accepted = False
+    docsh_id.save()
+    return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
+
+
+@api_view(['PUT'])
+def confirm_document(request, doc_id, user_id):
+    try:
+        doc = Document_shared.objects.get(doc_id = doc_id , parties_id = user_id)
+    except Documents.DoesNotExist:
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    doc.is_accepted = True
+    doc.save()
+    
+    return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
