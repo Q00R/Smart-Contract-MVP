@@ -70,7 +70,7 @@ export default function Signup() {
             .then(data => {
                 console.log('Success:', data);
                 //redirect to login page
-                // window.location.href = '/login'
+                window.location.href = '/login'
             })
             .catch((error) => {
                 console.error('Error:', error);
