@@ -51,6 +51,7 @@ class Document_shared(models.Model):
     doc_id = models.ForeignKey(Documents, on_delete=models.CASCADE, related_name='shared_docs')
     owner_id = models.ForeignKey(Documents, on_delete=models.CASCADE, related_name='owned_docs')
     parties_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=True)
+    is_accepted = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'documents_shared'

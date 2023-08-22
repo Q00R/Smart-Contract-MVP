@@ -40,14 +40,12 @@ def register(request):
             firstname = request.data['firstname'],
             lastname = request.data['lastname'],
             is_activated = False ,
-            #username = request.data['username'],
             nid = request.data['nid'],
             phone_number = request.data['phone number'],
             salt = salt
             )
-        serializers = UserSerializer(user)
-        return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
-        
+        user.save()
+        return Response({'message': 'User created'}, status=status.HTTP_201_CREATED) 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -138,8 +136,8 @@ def deactivate(request, pk):
     Users.objects.filter(user_id=pk).update(is_activated=False)
 
     return Response({'message': 'Account is deacivated'})
-
-
+# -------------------------------------------------------------------------------------------------------------
+# need to be logged in
 # edit account
 @api_view(['PUT'])
 def EditAccount(request, pk):
@@ -156,8 +154,9 @@ def EditAccount(request, pk):
    
     # add some defensive programming
     
-    Users.objects.filter(user_id=pk).update(firstname=firstname, lastname=lastname, phone_number=phone_number)
-    
+    if firstname or lastname or phone_number:
+        Users.objects.filter(user_id=pk).update(firstname=firstname, lastname=lastname, phone_number=phone_number)
+        
         
     return Response({'message': 'Account updated'}) 
     
@@ -175,11 +174,14 @@ def reset_password(request,pk):
     if updated_pass is None:
         return Response("Please provide the NEW Password.")
     
-    salt = user.salt
+    salt = secrets.token_hex(10)
     salted_password = salt + updated_pass   
     hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+
+    if hashed_password == user.password:
+        return Response({'message' : 'Cannot enter an old password'}, status=status.HTTP_400_BAD_REQUEST)
     
-    Users.objects.filter(user_id=pk).update(password=hashed_password)
+    Users.objects.filter(user_id=pk).update(password=hashed_password, salt=salt)
 
     return Response({'message': 'Password Reset'})
 
@@ -293,3 +295,26 @@ def calculate_pdf_hash(pdf_file):
     
     return sha256_hash.hexdigest()
 
+@api_view(['GET'])
+def documents_list(request, pk):
+    try:
+        user_documents = Documents.objects.filter(user=pk)
+        shared_documents = Document_shared.objects.filter(
+            owner_id=pk
+        ) | Document_shared.objects.filter(parties_id=pk)
+        
+        user_documents_serializer = DocumentSerializer(user_documents, many=True)
+        shared_documents_serializer = DocumentSharedSerializer(shared_documents, many=True)
+        
+        response_data = {
+            "user_documents": user_documents_serializer.data,
+            "shared_documents": shared_documents_serializer.data
+        }
+        
+        return Response(response_data)
+    except (Documents.DoesNotExist, Document_shared.DoesNotExist):
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+# make an api/function to search on the parties and see if they have accepted or not before publishing
+# make another api for sending to emails for user
+# for when sending the mail put a link to accept or reject the contract
