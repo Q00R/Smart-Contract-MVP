@@ -12,7 +12,6 @@ class Users(models.Model):
     lastname = models.CharField(max_length=250, blank=False, null=True)
     email = models.TextField(blank=False, null=True) #models.EmailField(unique=True)
     password =  models.TextField(blank=False, null=True)     #forms.CharField(widget=forms.PasswordInput)
-    #username = models.TextField(unique=True,blank=True, null=True)
     is_activated = models.BooleanField(default=False)
     nid = models.TextField(unique=True,blank=True, null=True)
     phone_number = models.TextField(unique=True,blank=True, null=True)
