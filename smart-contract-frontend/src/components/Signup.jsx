@@ -30,6 +30,8 @@ export default function Signup() {
             password: signupState.password,
         }
 
+        console.log(data)
+
         //prevent the default form behaviour
         // e.preventDefault();
 
@@ -53,8 +55,8 @@ export default function Signup() {
             last_name: signupState.lastName,
             email: signupState.email,
             phone: signupState.phone,
-            national_id: signupState.nationalId,
-            password: signupState.password,
+            national_id: signupState['national-id'],
+            password: signupState['password'],
         }
 
         console.log(data)
