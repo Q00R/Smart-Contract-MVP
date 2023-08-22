@@ -28,7 +28,7 @@ export default function Login() {
 
     return (
         <form className="flex flex-col mt-8 space-y-6">
-            <div className="-sspace-y-px self-center">
+            <div className="-sspace-y-px self-center w-1/6">
                 {
                     fields.map(field =>
                         <Input
