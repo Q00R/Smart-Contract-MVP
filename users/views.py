@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from .models import Users , Documents ,Document_shared, OneTimePassword
-from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer 
+from .models import Users , Documents ,Document_shared, OneTimePassword , Session
+from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer  , SessionSerializer
 
 import secrets
 import hashlib
@@ -19,6 +19,8 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 import zipfile
 from django.http import FileResponse
+from rest_framework.permissions import IsAuthenticated
+#permission_classes = (IsAuthenticated,)
 #----------
 
 from django.shortcuts import get_object_or_404
@@ -138,6 +140,10 @@ def deactivate(request, pk):
     return Response({'message': 'Account is deacivated'})
 # -------------------------------------------------------------------------------------------------------------
 # need to be logged in
+#fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
+#lama y3mel logout delelte token
+#w n3mel add le kol apis 7tet en nt2ked eno logged in w token tmm 
+#w n3mel GetUser be tare2 el token 
 # edit account
 @api_view(['PUT'])
 def EditAccount(request, pk):
@@ -209,13 +215,30 @@ def login(request):
     hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
     
     if hashed_password == user.password:
-        return Response("Login successful")
+        ser = UserSerializer(user)
+        
+        token = Session.objects.create(user_id = user)
+        token.generate_token()
+        token.save()
+        
+        
+        tokenser = SessionSerializer(token)
+        
+        return Response( {
+            "message":"login successful",
+            "user":ser.data , 
+            "token":tokenser.data
+            } )
+        
+        
     else:
         return Response("incorrect password, please try again.")
+    
 
 
 @api_view(['POST'])
 def upload_pdf(request, pk):
+    message = ''
     try:
         user = Users.objects.get(user_id=pk)
     except Users.DoesNotExist:
@@ -229,15 +252,65 @@ def upload_pdf(request, pk):
         zip = compress_pdf_to_zip(pdf_content, pdf_file.name)
         # Create a ContentFile from the compressed content
         compressed_pdf = ContentFile(zip, name=f'{pdf_file.name}.zip')
-        
+        print("pdf_file.name: " , pdf_file.name)
+        try:
+            existdoc= Documents.objects.filter(user=user, document_hash=pdf_hash)
+            if existdoc:
+                return Response({'message': 'File already uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Documents.DoesNotExist:
+            pass
         document = Documents(user=user, document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
         document.save()
-        
-        return Response({'message': 'PDF uploaded and compressed successfully.'}, status=status.HTTP_201_CREATED)
+                
+        if 'email_list' in request.data:
+            list_of_gmail = request.get["email_list"] 
+            for email in list_of_gmail:
+                print("email: " , email)
+                try:
+                    party = Users.objects.get(email=email)
+                except Users.DoesNotExist:
+                    return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+                doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
+                exist_ds = Document_shared.objects.get(doc_id=document, owner_id = user, parties_id = party)
+                if exist_ds:
+                    message += f'Email {party.email} was already added'
+                    pass
+                doc_shared.save()
+                
+        return Response({'message': 'PDF uploaded and compressed successfully.' + message}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    
+# a new api
 
+# @api_view(['POST'])
+# def add_email(request, doc_id,user_id):
+#     try:
+#         document = Documents.objects.get(document_id=doc_id)
+#     except Documents.DoesNotExist:
+#         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+#     try:
+#         user = Users.objects.get(user_id=user_id)
+#     except Users.DoesNotExist:
+#         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+#     if 'email_list' in request.data:
+#             list_of_gmail = request.data["email_list"] 
+#             for email in list_of_gmail:
+#                 print("email: " , email)
+#                 try:
+#                     party = Users.objects.get(email=email)
+#                 except Users.DoesNotExist:
+#                     return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+                
+#                 doc_shared = Document_shared(doc_id=document, owner_id=user, parties_id=party)
 
+#                 doc_shared.save()
+#             return Response("DONE")
+#     return Response("ERROR")    
 
 @api_view(['GET'])
 def get_document(request, pk):
@@ -343,3 +416,8 @@ def confirm_document(request, doc_id, user_id):
     doc.save()
     
     return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
+
+
+
+#knox
+#nzbot el esm pdf eno myt8yrsh 3ashan at2ked eno mesh mawgod fel database 

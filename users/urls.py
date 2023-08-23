@@ -15,8 +15,8 @@ urlpatterns = [
     path('api/documents/<str:pk>/upload/' ,views.upload_pdf),
     path('api/documents/<str:pk>/retrieve/' ,views.get_document),
     path('api/documents/<str:pk>/retrieve_details/' ,views.get_document_details),
-    path('api/documents/<str:pk>/doclist/' ,views.documents_list),
     path('api/reject_document/<str:doc_id>/user/<str:user_id>' ,views.reject_document),
     path('api/confirm_document/<str:doc_id>/user/<str:user_id>' ,views.confirm_document),
+    #path('api/add_email/<str:doc_id>/user/<str:user_id>' ,views.add_email),
 ]
 
