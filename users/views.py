@@ -54,12 +54,12 @@ def register(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # send mail with activation
+@custom_auth_required
 @api_view(['GET'])    
-def activate(request, pk):
-    try:
-        user = Users.objects.get(user_id=pk)
-    except Users.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+def activate(request):
+    
+    data = getUser(request)
+    user = data.data["user"]
     
     try:
         otpfound = OneTimePassword.objects.get(user_id = user.user_id)
@@ -88,17 +88,16 @@ def activate(request, pk):
         return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # verify acc with otp
+@custom_auth_required
 @api_view(['PUT'])
-def verify_otp(request, pk):
+def verify_otp(request):
     
     user_otps = request.data.get('otp')
     if user_otps is None:
         return Response("Please provide the OTP.")
     
-    try:
-        user = Users.objects.get(user_id=pk)
-    except Users.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    data = getUser(request)
+    user = data.data["user"]
     
     if user.is_activated:
         return Response("User is already activated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -127,17 +126,17 @@ def verify_otp(request, pk):
     return Response({'message': 'Email is Activated'})
 
 # deactivate account
+@custom_auth_required
 @api_view(['PUT'])
-def deactivate(request, pk):
-    try:
-        user = Users.objects.get(user_id=pk)
-    except Users.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+def deactivate(request):
+    
+    data = getUser(request)
+    user = data.data["user"]
     
     if not user.is_activated:
         return Response("User is already deactivated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-    Users.objects.filter(user_id=pk).update(is_activated=False)
+    Users.objects.filter(user_id=user.user_id).update(is_activated=False)
 
     return Response({'message': 'Account is deacivated'})
 # -------------------------------------------------------------------------------------------------------------
@@ -169,12 +168,12 @@ def EditAccount(request):
     
 
 # reset password
+@custom_auth_required
 @api_view(['PUT'])
-def reset_password(request,pk):
-    try:
-        user = Users.objects.get(user_id=pk)
-    except Users.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+def reset_password(request):
+    
+    data = getUser(request)
+    user = data.data["user"]
     
     updated_pass = request.data.get('password') #request.data['password']
     
@@ -188,7 +187,7 @@ def reset_password(request,pk):
     if hashed_password == user.password:
         return Response({'message' : 'Cannot enter an old password'}, status=status.HTTP_400_BAD_REQUEST)
     
-    Users.objects.filter(user_id=pk).update(password=hashed_password, salt=salt)
+    Users.objects.filter(user_id=user.user_id).update(password=hashed_password, salt=salt)
 
     return Response({'message': 'Password Reset'})
 
@@ -234,14 +233,13 @@ def login(request):
         return Response("incorrect password, please try again.")
     
 
-
+@custom_auth_required
 @api_view(['POST'])
-def upload_pdf(request, pk):
+def upload_pdf(request):
     message = ''
-    try:
-        user = Users.objects.get(user_id=pk)
-    except Users.DoesNotExist:
-        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    data = getUser(request)
+    user = data.data["user"]
     
     if 'document_file' in request.data:
         pdf_file = request.data['document_file']
@@ -270,9 +268,12 @@ def upload_pdf(request, pk):
                 except Users.DoesNotExist:
                     return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
                 doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
-                exist_ds = Document_shared.objects.get(doc_id=document, owner_id = user, parties_id = party)
-                if exist_ds:
-                    message += f'Email {party.email} was already added'
+                try:
+                    exist_ds = Document_shared.objects.filter(doc_id=document, owner_id = user, parties_id = party)
+                    if exist_ds:
+                        message += f'Email {party.email} was already added'
+                        continue
+                except Document_shared.DoesNotExist:
                     pass
                 doc_shared.save()
                 
@@ -283,9 +284,13 @@ def upload_pdf(request, pk):
 
 
 @api_view(['GET'])
+@custom_auth_required
 def get_document(request, pk):
+
+    data = getUser(request)
+    user = data.data["user"]
     try:
-        document = Documents.objects.get(document_id=pk)
+        document = Documents.objects.get(document_id=pk, user=user)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -310,9 +315,13 @@ def get_document(request, pk):
     return response
 
 @api_view(['GET'])
+@custom_auth_required
 def get_document_details(request, pk):
+    
+    data = getUser(request)
+    user = data.data["user"]
     try:
-        document = Documents.objects.get(document_id=pk)
+        document = Documents.objects.get(document_id=pk, user=user)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
@@ -339,12 +348,17 @@ def calculate_pdf_hash(pdf_file):
     return sha256_hash.hexdigest()
 
 @api_view(['GET'])
-def documents_list(request, pk):
+@custom_auth_required
+def documents_list(request):
+
+    data = getUser(request)
+    user = data.data["user"]
+
     try:
-        user_documents = Documents.objects.filter(user=pk)
+        user_documents = Documents.objects.filter(user=user)
         shared_documents = Document_shared.objects.filter(
-            owner_id=pk
-        ) | Document_shared.objects.filter(parties_id=pk)
+            owner_id=user
+        ) | Document_shared.objects.filter(parties_id=user)
         
         user_documents_serializer = DocumentSerializer(user_documents, many=True)
         shared_documents_serializer = DocumentSharedSerializer(shared_documents, many=True)
@@ -364,9 +378,12 @@ def documents_list(request, pk):
 
 
 @api_view(['PUT'])
-def reject_document(request, doc_id, user_id):
+@custom_auth_required
+def reject_document(request, doc_id):
+    data = getUser(request)
+    user = data.data["user"]
     try:
-        docsh_id = Document_shared.objects.get(doc_id=doc_id, parties_id=user_id)
+        docsh_id = Document_shared.objects.get(doc_id=doc_id, parties_id=user)
     except Document_shared.DoesNotExist:
         return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
     
@@ -376,9 +393,12 @@ def reject_document(request, doc_id, user_id):
 
 
 @api_view(['PUT'])
-def confirm_document(request, doc_id, user_id):
+@custom_auth_required
+def confirm_document(request, doc_id):
+    data = getUser(request)
+    user = data.data["user"]
     try:
-        doc = Document_shared.objects.get(doc_id = doc_id , parties_id = user_id)
+        doc = Document_shared.objects.get(doc_id = doc_id , parties_id=user)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
