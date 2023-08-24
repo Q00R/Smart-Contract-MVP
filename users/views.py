@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+from users.middleware import get_session_token , custom_auth_required
+
+
 from .models import Users , Documents ,Document_shared, OneTimePassword , Session
 from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer  , SessionSerializer
 
@@ -19,13 +22,12 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 import zipfile
 from django.http import FileResponse
-from rest_framework.permissions import IsAuthenticated
-#permission_classes = (IsAuthenticated,)
-#----------
+#--------
 
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from DocuSign import settings
+
 
 
 # register account
@@ -142,26 +144,25 @@ def deactivate(request, pk):
 # need to be logged in
 #fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
 #lama y3mel logout delelte token
-#w n3mel add le kol apis 7tet en nt2ked eno logged in w token tmm 
-#w n3mel GetUser be tare2 el token 
+
+
 # edit account
+@custom_auth_required
 @api_view(['PUT'])
-def EditAccount(request, pk):
-    try:
-        user = Users.objects.get(user_id=pk)
-    except Users.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+def EditAccount(request):
+
+    user = getUser(request)
+    data = user.data["user"]
     
     firstname = request.data.get('firstname')
     lastname = request.data.get('lastname')
-    #username = request.data.get('username')
-    #email =  request.data.get('email')
+
     phone_number = request.data.get('phone_number')
    
     # add some defensive programming
     
     if firstname or lastname or phone_number:
-        Users.objects.filter(user_id=pk).update(firstname=firstname, lastname=lastname, phone_number=phone_number)
+        res = Users.objects.filter(user_id=data.user_id).update(firstname=firstname, lastname=lastname, phone_number=phone_number)
         
         
     return Response({'message': 'Account updated'}) 
@@ -195,7 +196,6 @@ def reset_password(request,pk):
 # login
 @api_view(['POST'])
 def login(request):
-    
     email = request.data.get('email')
     password = request.data.get('password')
     
@@ -215,7 +215,6 @@ def login(request):
     hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
     
     if hashed_password == user.password:
-        ser = UserSerializer(user)
         
         token = Session.objects.create(user_id = user)
         token.generate_token()
@@ -224,11 +223,11 @@ def login(request):
         
         tokenser = SessionSerializer(token)
         
-        return Response( {
-            "message":"login successful",
-            "user":ser.data , 
-            "token":tokenser.data
-            } )
+        response = Response({"message":"login successful"})
+        response.set_cookie("token", token.token) #expires=token.expires_at        
+
+        
+        return response
         
         
     else:
@@ -281,36 +280,7 @@ def upload_pdf(request, pk):
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
     
-    
-    
-# a new api
 
-# @api_view(['POST'])
-# def add_email(request, doc_id,user_id):
-#     try:
-#         document = Documents.objects.get(document_id=doc_id)
-#     except Documents.DoesNotExist:
-#         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
-    
-#     try:
-#         user = Users.objects.get(user_id=user_id)
-#     except Users.DoesNotExist:
-#         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-    
-#     if 'email_list' in request.data:
-#             list_of_gmail = request.data["email_list"] 
-#             for email in list_of_gmail:
-#                 print("email: " , email)
-#                 try:
-#                     party = Users.objects.get(email=email)
-#                 except Users.DoesNotExist:
-#                     return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-                
-#                 doc_shared = Document_shared(doc_id=document, owner_id=user, parties_id=party)
-
-#                 doc_shared.save()
-#             return Response("DONE")
-#     return Response("ERROR")    
 
 @api_view(['GET'])
 def get_document(request, pk):
@@ -419,5 +389,20 @@ def confirm_document(request, doc_id, user_id):
 
 
 
-#knox
-#nzbot el esm pdf eno myt8yrsh 3ashan at2ked eno mesh mawgod fel database 
+
+
+def getUser(request):
+    sessionToken = get_session_token(request)
+
+    try:
+        print("d5lt el try")
+        session = Session.objects.get(token=sessionToken.data)
+        user = Users.objects.get(user_id=session.user_id_id)
+        
+        return Response({"user": user})
+    except Session.DoesNotExist:
+        return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    
+
+

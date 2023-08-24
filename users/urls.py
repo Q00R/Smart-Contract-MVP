@@ -10,7 +10,7 @@ urlpatterns = [
     path('api/users/<str:pk>/activate/' , views.activate),
     path('api/users/<str:pk>/verifyOTP/' , views.verify_otp),
     path('api/users/<str:pk>/deactivate/' , views.deactivate),
-    path('api/users/<str:pk>/' ,views.EditAccount),
+    path('api/users/Edit' ,views.EditAccount),
     path('api/users/<str:pk>/reset_password/' ,views.reset_password),
     path('api/documents/<str:pk>/upload/' ,views.upload_pdf),
     path('api/documents/<str:pk>/retrieve/' ,views.get_document),
