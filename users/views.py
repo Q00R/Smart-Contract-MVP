@@ -347,6 +347,11 @@ def calculate_pdf_hash(pdf_file):
     
     return sha256_hash.hexdigest()
 
+
+@api_view(['GET'])
+def example_api(request):
+    data = {'message': 'Hello from Django API!!!'}
+    return Response(data)
 @api_view(['GET'])
 @custom_auth_required
 def documents_list(request):
@@ -424,5 +429,3 @@ def getUser(request):
         return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
     
     
-
-
