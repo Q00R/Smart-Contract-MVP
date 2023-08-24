@@ -69,8 +69,9 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                //redirect to login page
-                window.location.href = '/login'
+                //redirect to OTP page
+                //TODO create OTP page with the OTP form
+                window.location.href = '/OTP'
             })
             .catch((error) => {
                 console.error('Error:', error);
