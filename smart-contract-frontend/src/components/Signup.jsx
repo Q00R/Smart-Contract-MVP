@@ -45,9 +45,9 @@ export default function Signup() {
             "firstname": signupState['first-name'],
             "lastname": signupState['last-name'],
             "email": signupState['email-address'],
-            "password": signupState['phone-number'],
+            "password": signupState['password'],
             "nid": signupState['national-id'],
-            "phone number": signupState['password'],
+            "phone number": signupState['phone-number'],
         }
 
         //if password and confirm password do not match, display error message

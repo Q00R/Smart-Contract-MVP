@@ -222,7 +222,7 @@ def login(request):
         
         tokenser = SessionSerializer(token)
         
-        response = Response({"message":"login successful"})
+        response = Response({"message":"login successful", "token": tokenser.data})
         response.set_cookie("token", token.token) #expires=token.expires_at        
 
         
