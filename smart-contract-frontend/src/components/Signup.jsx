@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { signupFields } from "../constants/formFields"
 import FormAction from "./FormAction";
 import Input from "./Input";
+import OTPVerificationModal from './OTP';
 
 
 const fields = signupFields;
@@ -13,6 +14,10 @@ export default function Signup() {
 
     //set the initial state of the form
     const [signupState, setSignupState] = useState(fieldsState);
+
+
+    //set the initial state of the modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     //handle input change
     const handleChange = (e) => setSignupState({ ...signupState, [e.target.id]: e.target.value });
@@ -32,6 +37,10 @@ export default function Signup() {
         //call the createAccount function
         createAccount()
     }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     //handle Signup API Integration here
     const createAccount = () => {
@@ -69,9 +78,8 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                //redirect to OTP page
-                //TODO create OTP page with the OTP form
-                window.location.href = '/OTP'
+                // After successful signup, open the OTP modal
+                setIsModalOpen(true);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -99,6 +107,8 @@ export default function Signup() {
                     )
                 }
                 <FormAction handleSubmit={handleSubmit} text="Signup" />
+
+                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} />
             </div>
         </form>
     )
