@@ -50,6 +50,30 @@ export default function Login() {
                     //if user is not active, show otp verification modal
                     if (!data.is_active) {
                         console.log("user is not active")
+                        //send otp to user
+                        const sendOTP = () => {
+                            fetch('http://localhost:8000/api/users/<str:pk>/activate/', {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+
+                                },
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log(JSON.stringify(data) + " success ")
+                                    console.log(data)
+                                    if (data.success) {
+                                        console.log(data.success)
+                                    }
+                                    else {
+                                        console.log(data.error)
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error('Error:', error);
+                                });
+                        }
                         //show otp verification modal
                         document.getElementById('otp-verification-modal').style.display = 'block'
                     }
@@ -60,9 +84,8 @@ export default function Login() {
             .catch((error) => {
                 console.error('Error:', error);
             });
-
-
     }
+
 
 
     return (
