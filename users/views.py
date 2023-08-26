@@ -28,6 +28,12 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from DocuSign import settings
 
+#lama y3mel logout delelte token
+#fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
+
+# make an api/function to search on the parties and see if they have accepted or not before publishing
+# make another api for sending emails for user
+# for when sending the mail put a link to accept or reject the contract
 
 
 # register account
@@ -60,6 +66,9 @@ def activate(request):
     
     data = getUser(request)
     user = data.data["user"]
+    
+    if user.is_activated:
+        return Response({'Message': 'User already activated'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     try:
         otpfound = OneTimePassword.objects.get(user_id = user.user_id)
@@ -140,10 +149,6 @@ def deactivate(request):
 
     return Response({'message': 'Account is deacivated'})
 # -------------------------------------------------------------------------------------------------------------
-# need to be logged in
-#fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
-#lama y3mel logout delelte token
-
 
 # edit account
 @custom_auth_required
@@ -222,7 +227,7 @@ def login(request):
         
         tokenser = SessionSerializer(token)
         
-        response = Response({"message":"login successful"})
+        response = Response({"message":"login successful" , "token":tokenser.data})
         response.set_cookie("token", token.token) #expires=token.expires_at        
 
         
@@ -280,7 +285,6 @@ def upload_pdf(request):
         return Response({'message': 'PDF uploaded and compressed successfully.' + message}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
-    
 
 
 @api_view(['GET'])
@@ -372,11 +376,6 @@ def documents_list(request):
     except (Documents.DoesNotExist, Document_shared.DoesNotExist):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-# make an api/function to search on the parties and see if they have accepted or not before publishing
-# make another api for sending to emails for user
-# for when sending the mail put a link to accept or reject the contract
-
-
 @api_view(['PUT'])
 @custom_auth_required
 def reject_document(request, doc_id):
@@ -406,9 +405,6 @@ def confirm_document(request, doc_id):
     doc.save()
     
     return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
-
-
-
 
 
 def getUser(request):
