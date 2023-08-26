@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { signupFields } from "../constants/formFields"
 import FormAction from "./FormAction";
 import Input from "./Input";
-import OTPVerificationModal from './OTP';
+import OTPVerificationModal from './OTPVerificationModal';
 
 
 const fields = signupFields;
@@ -78,8 +78,6 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                // After successful signup, open the OTP modal
-                setIsModalOpen(true);
             })
             .catch((error) => {
                 console.error('Error:', error);

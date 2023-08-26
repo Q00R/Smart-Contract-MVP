@@ -3,6 +3,7 @@ import { loginFields } from "../constants/formFields";
 import FormAction from "./FormAction";
 import FormExtra from "./FormExtra";
 import Input from "./Input";
+import OTPVerificationModal from './OTPVerificationModal';
 
 const fields = loginFields;
 let fieldsState = {};
@@ -46,7 +47,14 @@ export default function Login() {
                 if (data.token) {
                     console.log(data.token)
                     localStorage.setItem('token', data.token)
-                    window.location.href = '/user#dashboard'
+                    //if user is not active, show otp verification modal
+                    if (!data.is_active) {
+                        console.log("user is not active")
+                        //show otp verification modal
+                        document.getElementById('otp-verification-modal').style.display = 'block'
+                    }
+                    else
+                        window.location.href = '/user#dashboard'
                 }
             })
             .catch((error) => {
@@ -82,6 +90,7 @@ export default function Login() {
                 <FormExtra />
                 {/* TODO Add I am not robot captcha */}
                 <FormAction handleSubmit={handleSubmit} text="Login" />
+                <OTPVerificationModal />
             </div>
         </form>
     )
