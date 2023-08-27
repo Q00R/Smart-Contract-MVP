@@ -3,6 +3,7 @@ import { loginFields } from "../constants/formFields";
 import FormAction from "./FormAction";
 import FormExtra from "./FormExtra";
 import Input from "./Input";
+import OTPVerificationModal from './OTPVerificationModal';
 
 const fields = loginFields;
 let fieldsState = {};
@@ -23,7 +24,68 @@ export default function Login() {
     //Handle Login API Integration here
     const authenticateUser = () => {
 
+        //get user details from loginState
+        const data = {
+            "email": loginState['email-address'],
+            "password": loginState['password'],
+        }
+
+        // console.log(data)
+
+        //call login API
+        fetch('http://localhost:8000/api/users/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(JSON.stringify(data) + " success ")
+                console.log(data)
+                if (data.token) {
+                    console.log(data.token)
+                    localStorage.setItem('token', data.token)
+                    //if user is not active, show otp verification modal
+                    if (!data.is_active) {
+                        console.log("user is not active")
+                        //send otp to user
+                        const sendOTP = () => {
+                            fetch('http://localhost:8000/api/users/<str:pk>/activate/', {
+                                method: 'GET',
+                                headers: {
+                                    'Content-Type': 'application/json',
+
+                                },
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log(JSON.stringify(data) + " success ")
+                                    console.log(data)
+                                    if (data.success) {
+                                        console.log(data.success)
+                                    }
+                                    else {
+                                        console.log(data.error)
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error('Error:', error);
+                                });
+                        }
+                        //show otp verification modal
+                        document.getElementById('otp-verification-modal').style.display = 'block'
+                    }
+                    else
+                        window.location.href = '/user#dashboard'
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     }
+
 
 
     return (
@@ -49,7 +111,9 @@ export default function Login() {
 
 
                 <FormExtra />
+                {/* TODO Add I am not robot captcha */}
                 <FormAction handleSubmit={handleSubmit} text="Login" />
+                <OTPVerificationModal />
             </div>
         </form>
     )

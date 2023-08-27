@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { signupFields } from "../constants/formFields"
 import FormAction from "./FormAction";
 import Input from "./Input";
+import OTPVerificationModal from './OTPVerificationModal';
 
 
 const fields = signupFields;
@@ -13,6 +14,10 @@ export default function Signup() {
 
     //set the initial state of the form
     const [signupState, setSignupState] = useState(fieldsState);
+
+
+    //set the initial state of the modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     //handle input change
     const handleChange = (e) => setSignupState({ ...signupState, [e.target.id]: e.target.value });
@@ -33,6 +38,10 @@ export default function Signup() {
         createAccount()
     }
 
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
     //handle Signup API Integration here
     const createAccount = () => {
         //talk to the django backend, create a user account
@@ -45,9 +54,9 @@ export default function Signup() {
             "firstname": signupState['first-name'],
             "lastname": signupState['last-name'],
             "email": signupState['email-address'],
-            "password": signupState['phone-number'],
+            "password": signupState['password'],
             "nid": signupState['national-id'],
-            "phone number": signupState['password'],
+            "phone number": signupState['phone-number'],
         }
 
         //if password and confirm password do not match, display error message
@@ -69,8 +78,6 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                //redirect to login page
-                window.location.href = '/login'
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -98,6 +105,8 @@ export default function Signup() {
                     )
                 }
                 <FormAction handleSubmit={handleSubmit} text="Signup" />
+
+                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} />
             </div>
         </form>
     )
