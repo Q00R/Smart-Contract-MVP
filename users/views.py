@@ -240,6 +240,22 @@ def login(request):
 
 @custom_auth_required
 @api_view(['POST'])
+def logout(request):
+    
+    data = getUser(request)
+    user = data.data["user"]
+
+    try:
+        token = Session.objects.filter(user_id=user)
+        token.delete()
+    except Session.DoesNotExist:
+        # redirect to login page
+        pass
+
+    return Response({'message : You are logged out'}, status=status.HTTP_200_OK)
+
+@custom_auth_required
+@api_view(['POST'])
 def upload_pdf(request):
     message = ''
     
