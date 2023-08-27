@@ -84,7 +84,7 @@ class Session(models.Model):
 
     def generate_token(self):
         self.token = str(uuid.uuid4())
-        self.expires_at = timezone.now() + timedelta(minutes=2)
+        self.expires_at = timezone.now() + timedelta(hours=2)
 
     def is_expired(self):    
         print("self.expires_at: " , self.expires_at)

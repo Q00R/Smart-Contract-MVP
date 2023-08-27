@@ -18,6 +18,6 @@ urlpatterns = [
     path('api/documents/<str:pk>/retrieve_details/' ,views.get_document_details),
     path('api/reject_document/<str:doc_id>/' ,views.reject_document),
     path('api/confirm_document/<str:doc_id>/' ,views.confirm_document),
-    
+    path('api/confirmation/<str:doc_id>/' ,views.get_confirmation),
 ]
 

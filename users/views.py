@@ -219,10 +219,25 @@ def login(request):
     hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
     
     if hashed_password == user.password:
-        
-        token = Session.objects.create(user_id = user)
+
+        try:
+            exist_token = Session.objects.get(user_id=user)
+            if exist_token.is_expired():
+                exist_token.delete()
+            else:
+                return Response({'message : token already exists and redirect to home page'})
+        except Session.DoesNotExist:
+            pass
+        except Session.MultipleObjectsReturned:
+            tokens = Session.objects.filter(user_id=user)
+            tokens.delete
+       
+        token  = Session.objects.create(user_id=user)
         token.generate_token()
         token.save()
+
+
+        
         
         
         tokenser = SessionSerializer(token)
@@ -435,6 +450,28 @@ def getUser(request):
     except Session.DoesNotExist:
         return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
     
+@custom_auth_required
+@api_view(['GET'])
+def get_confirmation(request, doc_id):
+    data = getUser(request)
+    user = data.data["user"]
+    try:
+        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
+    except Documents.DoesNotExist:
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
-
-
+    accept = False
+    for document in docs:
+        if document.is_accepted:
+            accept = True
+        else:
+            accept = False
+            break
+    
+    if accept:
+        acc_docs = DocumentSharedSerializer(docs, many=True)
+        return Response({'message : All other parties have accepted', acc_docs}, status=status.HTTP_200_OK)
+    
+    r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted=False)
+    rej_docs = DocumentSharedSerializer(r_docs, many=True)
+    return Response({'message : Not all other parties have accepted', rej_docs}, status=status.HTTP_200_OK)
