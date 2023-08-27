@@ -63,6 +63,7 @@ export default function Login() {
             console.log("user is not active")
             //send otp to user
 
+            // str:pk is the user id
             fetch('http://localhost:8000/api/users/<str:pk>/activate/', {
                 method: 'GET',
                 headers: {
