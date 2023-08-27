@@ -242,7 +242,7 @@ def login(request):
         
         tokenser = SessionSerializer(token)
         
-        response = Response({"message":"login successful" , "token":tokenser.data})
+        response = Response({"message":"login successful", "token": tokenser.data, "user": user, "is_activated": user.is_activated})
         response.set_cookie("token", token.token) #expires=token.expires_at        
 
         
@@ -382,6 +382,11 @@ def calculate_pdf_hash(pdf_file):
     
     return sha256_hash.hexdigest()
 
+
+@api_view(['GET'])
+def example_api(request):
+    data = {'message': 'Hello from Django API!!!'}
+    return Response(data)
 @api_view(['GET'])
 @custom_auth_required
 def documents_list(request):
@@ -475,3 +480,4 @@ def get_confirmation(request, doc_id):
     r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted=False)
     rej_docs = DocumentSharedSerializer(r_docs, many=True)
     return Response({'message : Not all other parties have accepted', rej_docs}, status=status.HTTP_200_OK)
+
