@@ -12,7 +12,7 @@ function OTPVerificationModal({ isOpen, onRequestClose }) {
     const handleVerify = async () => {
         try {
             // Send the entered OTP to the server for validation
-            const response = await fetch('http://localhost:8000/api/users/<str:pk>/verifyOTP/', {
+            const response = await fetch('http://localhost:8000/api/users/verifyOTP/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

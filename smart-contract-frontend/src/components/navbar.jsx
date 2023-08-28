@@ -46,7 +46,7 @@ const navbar = () => {
             <div className="navbar bg-base-100">
                 <div className="navbar-start">
                     <a href="/" className="normal-case text-xl">
-                        <img src={logo} className='w-14 h-14' />
+                        <img src={logo} className='w-16 h-16' />
                     </a>
                 </div>
             </div>
