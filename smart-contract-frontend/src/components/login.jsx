@@ -24,6 +24,19 @@ export default function Login() {
     //Handle Login API Integration here
     const authenticateUser = () => {
 
+        //log out user if already logged in
+        if (localStorage.getItem('token')) {
+            localStorage.removeItem('token')
+
+            fetch('http://localhost:8000/api/users/logout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+
+                },
+            })
+        }
+
         //get user details from loginState
         const data = {
             "email": loginState['email-address'],
@@ -48,7 +61,7 @@ export default function Login() {
                     console.log(data.token)
                     localStorage.setItem('token', data.token)
                     // send otp
-                    if (!data.is_active) {
+                    if (!data.is_activated) {
                         console.log("user is not active")
                         //send otp to user
 
@@ -77,8 +90,9 @@ export default function Login() {
                         //show otp verification modal
                         document.getElementById('otp-verification-modal').style.display = 'block'
                     }
-                    else
-                        window.location.href = '/user#dashboard'
+                    else {
+                        // window.location.href = '/user#dashboard'
+                    }
                 }
             })
             .catch((error) => {

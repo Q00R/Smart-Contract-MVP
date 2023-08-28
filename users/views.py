@@ -291,7 +291,7 @@ def login(request):
                 exist_token.delete()
             else:
                 sertoken = SessionSerializer(exist_token)
-                return Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data})
+                return Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
         except Session.DoesNotExist:
             pass
         except Session.MultipleObjectsReturned:
@@ -302,7 +302,7 @@ def login(request):
         token.generate_token()
         token.save()
         tokenser = SessionSerializer(token)
-        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data})
+        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated})
         response.set_cookie("token", token.token) #expires=token.expires_at        
 
         
