@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/users/logout/' ,views.logout),
     path('api/users/documents/' ,views.documents_list),
     path('api/users/activate/' , views.activate),
+    path('api/users/email_reset/' , views.email_pass_reset),
     path('api/users/verifyOTP/' , views.verify_otp),
     path('api/users/deactivate/' , views.deactivate),
     path('api/users/Edit' ,views.EditAccount),
