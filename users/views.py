@@ -283,26 +283,42 @@ def login(request):
     
     if hashed_password == user.password:
         userser = UserSerializer(user)
+
+        print('abl el try')
+
         try:
+
+            print("d5lt el try")
             
-            exist_token = Session.objects.get(user_id=user.user_id)
+            print(user)
+            
+            print("cookie: " , request.COOKIES.get('token'))
+
+            exist_token = Session.objects.get(user_id=user)
+
+            print("exist_token: " , exist_token)
             
             if exist_token.is_expired():
                 exist_token.delete()
+                print("expired token deleted")
             else:
+                print("da5lt el else")
                 sertoken = SessionSerializer(exist_token)
                 response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
-                #response.set_cookie("token", exist_token.token)
+                response.set_cookie("token", exist_token.token)
                 return response           
         except Session.DoesNotExist:
             pass
         except Session.MultipleObjectsReturned:
+            print("da5lt el except")
             tokens = Session.objects.filter(user_id=user)
             tokens.delete()
 
+        print("5alst el except")
         token  = Session.objects.create(user_id=user)
         token.generate_token()
         token.save()
+        print("final token: " , token.token)
         tokenser = SessionSerializer(token)
         response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated})
         response.set_cookie("token", token.token) #expires=token.expires_at        
