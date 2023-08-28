@@ -89,7 +89,11 @@ def activate(request):
     recipient_list = [user.email]
     print("user.email: " , user.email)
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
-    
+    print("Sending email: " , settings.EMAIL_HOST_USER)
+    print("Sending email pass: " , settings.EMAIL_HOST_PASSWORD)
+
+
+
     try:
         email.send() 
         return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
@@ -289,10 +293,7 @@ def login(request):
                 sertoken = SessionSerializer(exist_token)
                 response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data})
                 #response.set_cookie("token", exist_token.token)
-                return response
-            
-            
-            
+                return response           
         except Session.DoesNotExist:
             pass
         except Session.MultipleObjectsReturned:
@@ -302,11 +303,8 @@ def login(request):
         token  = Session.objects.create(user_id=user)
         token.generate_token()
         token.save()
-
-        
-        
         tokenser = SessionSerializer(token)
-        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data})
+        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated})
         response.set_cookie("token", token.token) #expires=token.expires_at        
 
         

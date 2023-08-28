@@ -24,6 +24,19 @@ export default function Login() {
     //Handle Login API Integration here
     const authenticateUser = () => {
 
+        //log out user if already logged in
+        if (localStorage.getItem('token')) {
+            localStorage.removeItem('token')
+
+            fetch('http://localhost:8000/api/users/logout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+
+                },
+            })
+        }
+
         //get user details from loginState
         const data = {
             "email": loginState['email-address'],
@@ -47,46 +60,45 @@ export default function Login() {
                 if (data.token) {
                     console.log(data.token)
                     localStorage.setItem('token', data.token)
-                    //if user is not active, show otp verification modal
-                    if (!data.is_active) {
+                    // send otp
+                    if (!data.is_activated) {
                         console.log("user is not active")
                         //send otp to user
-                        const sendOTP = () => {
-                            fetch('http://localhost:8000/api/users/<str:pk>/activate/', {
-                                method: 'GET',
-                                headers: {
-                                    'Content-Type': 'application/json',
 
-                                },
+                        fetch('http://localhost:8000/api/users/activate/', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+
+                            },
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(JSON.stringify(data) + " success ")
+                                console.log(data)
+                                if (data.success) {
+                                    console.log(data.success)
+                                }
+                                else {
+                                    console.log(data.error)
+                                }
                             })
-                                .then(response => response.json())
-                                .then(data => {
-                                    console.log(JSON.stringify(data) + " success ")
-                                    console.log(data)
-                                    if (data.success) {
-                                        console.log(data.success)
-                                    }
-                                    else {
-                                        console.log(data.error)
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error('Error:', error);
-                                });
-                        }
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+
                         //show otp verification modal
                         document.getElementById('otp-verification-modal').style.display = 'block'
                     }
-                    else
-                        window.location.href = '/user#dashboard'
+                    else {
+                        // window.location.href = '/user#dashboard'
+                    }
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
     }
-
-
 
     return (
         <form className="flex flex-col mt-8 space-y-6">
@@ -108,8 +120,6 @@ export default function Login() {
 
                     )
                 }
-
-
                 <FormExtra />
                 {/* TODO Add I am not robot captcha */}
                 <FormAction handleSubmit={handleSubmit} text="Login" />
