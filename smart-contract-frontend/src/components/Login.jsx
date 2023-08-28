@@ -35,6 +35,8 @@ export default function Login() {
 
                 },
             })
+
+            console.log("logged out")
         }
 
         //get user details from loginState
