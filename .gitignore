@@ -135,3 +135,7 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+users/__pycache__/
+users/migrations/__pycache__/
+DocuSign/__pycache__/

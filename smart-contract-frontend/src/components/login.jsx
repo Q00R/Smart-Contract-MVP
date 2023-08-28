@@ -47,52 +47,44 @@ export default function Login() {
                 if (data.token) {
                     console.log(data.token)
                     localStorage.setItem('token', data.token)
-                    // sendOTP(data)
+                    // send otp
+                    if (!data.is_active) {
+                        console.log("user is not active")
+                        //send otp to user
+
+                        fetch('http://localhost:8000/api/users/activate/', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+
+                            },
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(JSON.stringify(data) + " success ")
+                                console.log(data)
+                                if (data.success) {
+                                    console.log(data.success)
+                                }
+                                else {
+                                    console.log(data.error)
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+
+                        //show otp verification modal
+                        document.getElementById('otp-verification-modal').style.display = 'block'
+                    }
+                    else
+                        window.location.href = '/user#dashboard'
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
     }
-
-
-    const sendOTP = (data) => {
-
-        //if user is not active, show otp verification modal
-        if (!data.is_active) {
-            console.log("user is not active")
-            //send otp to user
-
-            // str:pk is the user id
-            fetch('http://localhost:8000/api/users/<str:pk>/activate/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(JSON.stringify(data) + " success ")
-                    console.log(data)
-                    if (data.success) {
-                        console.log(data.success)
-                    }
-                    else {
-                        console.log(data.error)
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-
-            //show otp verification modal
-            document.getElementById('otp-verification-modal').style.display = 'block'
-        }
-        else
-            window.location.href = '/user#dashboard'
-    }
-
 
     return (
         <form className="flex flex-col mt-8 space-y-6">

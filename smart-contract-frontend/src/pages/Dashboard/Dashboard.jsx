@@ -3,8 +3,12 @@ import React, { useEffect, useState } from 'react';
 
 const Dashboard = () => {
 
-    <div>
-    </div>
+
+
+    return (
+        <div className="flex flex-col">
+
+        </div>
     );
 };
 
