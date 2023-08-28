@@ -170,7 +170,42 @@ def EditAccount(request):
         
         
     return Response({'message': 'Account updated'}) 
+
+@custom_auth_required
+@api_view(['GET'])    
+def email_pass_reset(request):
     
+    data = getUser(request)
+    user = data.data["user"]
+    
+    
+    try:
+        otpfound = OneTimePassword.objects.get(user_id = user.user_id)
+        otpfound.delete()
+    except OneTimePassword.DoesNotExist:
+        pass  # No OTP found, nothing to delete
+    
+    if not user.email:
+        return Response({'error': 'Email not found'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    otp = OneTimePassword.objects.create(user_id = user)
+    otp.generate_OTP()
+    otp.save()
+    
+    
+    subject = 'Your OTP for Password reset'
+    message = f'Your OTP is: {otp.otp}'
+    recipient_list = [user.email]
+    print("user.email: " , user.email)
+    email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
+    
+    try:
+        email.send() 
+        return Response({'message': 'Password reset OTP sent'}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 # reset password
 @custom_auth_required
@@ -179,11 +214,34 @@ def reset_password(request):
     
     data = getUser(request)
     user = data.data["user"]
+
     
+    user_otps = request.data.get('otp')
+    if user_otps is None:
+        return Response("Please provide the OTP.")
+    
+    if user_otps is None:
+        return Response("Please provide the OTP.")
+    verified_email = user.email
+    user = get_object_or_404(Users, email=verified_email)
+   
     updated_pass = request.data.get('password') #request.data['password']
-    
     if updated_pass is None:
         return Response("Please provide the NEW Password.")
+    
+    try:
+        saved_otp = OneTimePassword.objects.get(user_id = user.user_id)
+    except OneTimePassword.DoesNotExist:
+        return Response("OTP not found. Please request a new OTP.")
+    
+    if saved_otp.otp != user_otps:
+        return Response("Invalid OTP")
+    
+    if saved_otp.is_expired():
+        saved_otp.delete()
+        return Response("OTP is expired. Please regenerate another OTP.")
+    
+    
     
     salt = secrets.token_hex(10)
     salted_password = salt + updated_pass   
@@ -193,6 +251,7 @@ def reset_password(request):
         return Response({'message' : 'Cannot enter an old password'}, status=status.HTTP_400_BAD_REQUEST)
     
     Users.objects.filter(user_id=user.user_id).update(password=hashed_password, salt=salt)
+    saved_otp.delete()
 
     return Response({'message': 'Password Reset'})
 
