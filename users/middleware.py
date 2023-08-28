@@ -14,11 +14,11 @@ def custom_auth_required(view_func):
         else:
             return JsonResponse({"error": "sessionToken error"}, status=401)
         
-        print("sessionToken: " , sessionToken)
+        print("abo el so7ab sessionToken: " , sessionToken)
         try:
             userSession = Session.objects.get(token=sessionToken)
         except Session.DoesNotExist:
-            return JsonResponse({"error": "user session error"}, status=401)
+            return JsonResponse({"error": "user session not found"}, status=401)
 
         if  userSession.is_expired():
             userSession.delete()
@@ -35,6 +35,8 @@ def get_session_token(request):
     if session_token:
         try:
             session = Session.objects.get(token=session_token)
+
+            print("deeh el session: " , session)
             
             return Response(session.token)
         except Session.DoesNotExist:
