@@ -219,30 +219,33 @@ def login(request):
     hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
     
     if hashed_password == user.password:
-
+        userser = UserSerializer(user)
         try:
-            exist_token = Session.objects.get(user_id=user)
+            
+            exist_token = Session.objects.get(user_id=user.user_id)
+            
             if exist_token.is_expired():
                 exist_token.delete()
             else:
-                return Response({'message : token already exists and redirect to home page'})
+                sertoken = SessionSerializer(exist_token)
+                return Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data})
+            
+            
+            
         except Session.DoesNotExist:
             pass
         except Session.MultipleObjectsReturned:
             tokens = Session.objects.filter(user_id=user)
-            tokens.delete
-       
+            tokens.delete()
+
         token  = Session.objects.create(user_id=user)
         token.generate_token()
         token.save()
 
-
-        
         
         
         tokenser = SessionSerializer(token)
-        
-        response = Response({"message":"login successful", "token": tokenser.data, "user": user, "is_activated": user.is_activated})
+        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data})
         response.set_cookie("token", token.token) #expires=token.expires_at        
 
         
