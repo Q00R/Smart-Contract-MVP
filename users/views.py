@@ -291,7 +291,9 @@ def login(request):
                 exist_token.delete()
             else:
                 sertoken = SessionSerializer(exist_token)
-                return Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
+                response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data})
+                #response.set_cookie("token", exist_token.token)
+                return response           
         except Session.DoesNotExist:
             pass
         except Session.MultipleObjectsReturned:
@@ -505,7 +507,8 @@ def confirm_document(request, doc_id):
 
 def getUser(request):
     sessionToken = get_session_token(request)
-
+    #ser = SessionSerializer(sessionToken)
+    #print("sessionToken: " , sessionToken.token)
     try:
         print("d5lt el try")
         session = Session.objects.get(token=sessionToken.data)
