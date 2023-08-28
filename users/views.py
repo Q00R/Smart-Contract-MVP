@@ -291,7 +291,7 @@ def login(request):
                 exist_token.delete()
             else:
                 sertoken = SessionSerializer(exist_token)
-                response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data})
+                response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
                 #response.set_cookie("token", exist_token.token)
                 return response           
         except Session.DoesNotExist:
