@@ -22,85 +22,61 @@ export default function Login() {
     }
 
     //Handle Login API Integration here
-    const authenticateUser = () => {
+    // Handle Login API Integration here
+    const authenticateUser = async () => {
+        try {
+            // Get user details from loginState
+            const input = {
+                "email": loginState['email-address'],
+                "password": loginState['password'],
+            };
 
-        //log out user if already logged in
-        if (localStorage.getItem('token')) {
-            localStorage.removeItem('token')
-
-            fetch('http://localhost:8000/api/users/logout/', {
+            // Call login API
+            const response = await fetch('http://localhost:8000/api/users/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-
                 },
-            })
-
-            console.log("logged out")
-        }
-
-        //get user details from loginState
-        const data = {
-            "email": loginState['email-address'],
-            "password": loginState['password'],
-        }
-
-        // console.log(data)
-
-        //call login API
-        fetch('http://localhost:8000/api/users/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data),
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(JSON.stringify(data) + " success ")
-                console.log(data)
-                if (data.token) {
-                    console.log(data.token)
-                    localStorage.setItem('token', data.token)
-                    // send otp
-                    if (!data.is_activated) {
-                        console.log("user is not active")
-                        //send otp to user
-
-                        fetch('http://localhost:8000/api/users/activate/', {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-
-                            },
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(JSON.stringify(data) + " success ")
-                                console.log(data)
-                                if (data.success) {
-                                    console.log(data.success)
-                                }
-                                else {
-                                    console.log(data.error)
-                                }
-                            })
-                            .catch((error) => {
-                                console.error('Error:', error);
-                            });
-
-                        //show otp verification modal
-                        document.getElementById('otp-verification-modal').style.display = 'block'
-                    }
-                    else {
-                        // window.location.href = '/user#dashboard'
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
+                body: JSON.stringify(input),
             });
-    }
+
+            const data = await response.json();
+            console.log(data);
+
+            if (!data.is_activated) {
+                console.log("user is not active");
+                // Send OTP
+                await sendOTP();
+            } else {
+                console.log("user is active");
+                // Redirect to dashboard
+                window.location.href = "/dashboard";
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    // Handle OTP Sending API Integration here
+    const sendOTP = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/users/activate/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+            console.log(JSON.stringify(data));
+            console.log(data);
+
+            // Show OTP verification modal
+            // document.getElementById('otp-verification-modal').style.display = 'block';
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     return (
         <form className="flex flex-col mt-8 space-y-6">
