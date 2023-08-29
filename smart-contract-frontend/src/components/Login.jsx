@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import Cookies from 'js-cookie';
+
 import { loginFields } from "../constants/formFields";
 import FormAction from "./FormAction";
 import FormExtra from "./FormExtra";
@@ -13,27 +15,21 @@ export default function Login() {
     const [loginState, setLoginState] = useState(fieldsState);
 
     const handleChange = (e) => {
-        setLoginState({ ...loginState, [e.target.id]: e.target.value })
+        setLoginState({ ...loginState, [e.target.id]: e.target.value });
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        authenticateUser();
+        await authenticateUser();
     }
 
-    //Handle Login API Integration here
-    // Handle Login API Integration here
     const authenticateUser = async () => {
         try {
-            // Get user details from loginState
             const input = {
                 "email": loginState['email-address'],
                 "password": loginState['password'],
             };
 
-            // console.log(input);
-
-            // Call login API
             const response = await fetch('http://localhost:8000/api/users/login/', {
                 method: 'POST',
                 headers: {
@@ -43,16 +39,15 @@ export default function Login() {
             });
 
             const data = await response.json();
+            console.log(data);
 
-
+            Cookies.set('token', data.token['token']);
 
             if (!data.is_activated) {
                 console.log("user is not active");
-                // Send OTP
                 await sendOTP();
             } else {
                 console.log("user is active");
-                // Redirect to dashboard
                 window.location.href = "/dashboard";
             }
         } catch (error) {
@@ -60,13 +55,17 @@ export default function Login() {
         }
     };
 
-    // Handle OTP Sending API Integration here
     const sendOTP = async () => {
         try {
+            console.log("Sending OTP");
+
+            console.log(Cookies.get('token'));
+
             const response = await fetch('http://localhost:8000/api/users/activate/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
                 },
             });
 
@@ -75,7 +74,7 @@ export default function Login() {
             console.log(data);
 
             // Show OTP verification modal
-            // document.getElementById('otp-verification-modal').style.display = 'block';
+            document.getElementById("otp-verification-modal").classList.remove("hidden");
         } catch (error) {
             console.error('Error:', error);
         }
@@ -102,7 +101,6 @@ export default function Login() {
                     )
                 }
                 <FormExtra />
-                {/* TODO Add I am not robot captcha */}
                 <FormAction handleSubmit={handleSubmit} text="Login" />
                 <OTPVerificationModal />
             </div>
