@@ -12,6 +12,8 @@ let fieldsState = {};
 fields.forEach(field => fieldsState[field.id] = '');
 
 export default function Login() {
+
+
     const [loginState, setLoginState] = useState(fieldsState);
 
     const handleChange = (e) => {
@@ -22,6 +24,18 @@ export default function Login() {
         e.preventDefault();
         await authenticateUser();
     }
+
+    const [isModalOpen, setIsModalOpen] = useState(true);
+
+    const handleSignup = () => {
+        // Perform signup logic
+        // After successful signup, open the OTP modal
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     const authenticateUser = async () => {
         try {
@@ -74,7 +88,9 @@ export default function Login() {
             console.log(data);
 
             // Show OTP verification modal
-            document.getElementById("otp-verification-modal").classList.remove("hidden");
+            setIsModalOpen(true);
+
+
         } catch (error) {
             console.error('Error:', error);
         }
@@ -102,7 +118,8 @@ export default function Login() {
                 }
                 <FormExtra />
                 <FormAction handleSubmit={handleSubmit} text="Login" />
-                <OTPVerificationModal />
+                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} userEmail={loginState['email-address']} />
+
             </div>
         </form>
     )
