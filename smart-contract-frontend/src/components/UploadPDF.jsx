@@ -19,7 +19,7 @@ const UploadPDF = () => {
 
         try {
             const formData = new FormData();
-            formData.append('pdfFile', selectedFile);
+            formData.append('document_file', selectedFile);
 
             // Perform the file upload here
             const response = await fetch('http://localhost:8000/api/documents/upload/', {
@@ -27,8 +27,9 @@ const UploadPDF = () => {
                 body: formData,
             });
 
-            // Handle the response, e.g., show a success message
-            console.log('File uploaded successfully.');
+            const data = await response.json();
+            console.log(data);
+
         } catch (error) {
             console.error('Error uploading file:', error);
         }

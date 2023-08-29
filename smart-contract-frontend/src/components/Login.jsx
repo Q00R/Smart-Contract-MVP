@@ -31,6 +31,8 @@ export default function Login() {
                 "password": loginState['password'],
             };
 
+            // console.log(input);
+
             // Call login API
             const response = await fetch('http://localhost:8000/api/users/login/', {
                 method: 'POST',
@@ -41,7 +43,8 @@ export default function Login() {
             });
 
             const data = await response.json();
-            console.log(data);
+
+
 
             if (!data.is_activated) {
                 console.log("user is not active");
