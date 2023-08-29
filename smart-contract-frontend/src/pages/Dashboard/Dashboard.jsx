@@ -1,17 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import UploadPDF from '../../components/UploadPDF';
 import Table from '../../components/Table';
+import Header from '../../components/Header';
+import documentsImage from '../../Assets/documentsImage.png'
 
 const Dashboard = () => {
 
     return (
         <div className="flex flex-col">
-            <div className="self-center w-1/2 my-10">
+
+            <div className="container rounded-lg shadow-xl border-2 self-center w-1/2 my-5 p-10">
+                <Header
+                    // imgSrc={documentsImage}
+                    heading="Upload Documents"
+                />
                 <UploadPDF />
             </div>
 
-            <div className="self-center w-full my-5">
+            <div className="container rounded-lg shadow-xl border-2 self-center w-full h-full my-5 p-5">
+                <Header
+                    imgSrc={documentsImage}
+                    heading="Documents"
+                />
+
                 <Table
+                    className="overflow-x-auto"
 
                     colOneHeader="Name"
                     colTwoHeader="Email"

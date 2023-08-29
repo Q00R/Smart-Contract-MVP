@@ -1,15 +1,58 @@
-import React from 'react'
+import React, { useState } from 'react';
+import TableRow from './TableRow';
 
 const Table = (props) => {
+    const [selectAll, setSelectAll] = useState(false);
+    const [rows, setRows] = useState([
+        {
+            isChecked: false,
+            colOneContent: props.colOneContent,
+            colTwoContent: props.colTwoContent,
+            colThreeContent: props.colThreeContent,
+            actionButton: props.actionButton,
+        },
+    ]);
+
+    const toggleSelectAll = () => {
+        const updatedRows = rows.map((row) => ({ ...row, isChecked: !selectAll }));
+        setSelectAll(!selectAll);
+        setRows(updatedRows);
+    };
+
+    const toggleCheckbox = (index) => {
+        const updatedRows = [...rows];
+        updatedRows[index].isChecked = !updatedRows[index].isChecked;
+        setRows(updatedRows);
+    };
+
+    // Function to add a new row
+    const addRow = () => {
+        const newRow = {
+            isChecked: false,
+            colOneContent: props.colOneNewContent, // Modify with your data
+            colTwoContent: props.colTwoNewContent,
+            colThreeContent: props.colThreeNewContent,
+            actionButton: props.actionButton,
+        };
+
+        const updatedRows = [...rows, newRow];
+        setRows(updatedRows);
+    };
+
     return (
-        <div className="overflow-x-auto">
-            <table className="table">
+        <div className="overflow-x-auto m-5">
+            <table className="table w-full h-full">
                 {/* head */}
                 <thead>
                     <tr>
                         <th>
                             <label>
-                                <input type="checkbox" className="checkbox" />
+                                <input
+                                    type="checkbox"
+                                    className="checkbox"
+                                    checked={selectAll}
+                                    onChange={toggleSelectAll}
+                                />
                             </label>
                         </th>
                         <th>{props.colOneHeader}</th>
@@ -19,28 +62,14 @@ const Table = (props) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {/* row 1 */}
-                    <tr>
-                        <th>
-                            <label>
-                                <input type="checkbox" className="checkbox" />
-                            </label>
-                        </th>
-                        <td>
-                            <div className="flex items-center space-x-3">
-                                {props.colOneContent}
-                            </div>
-                        </td>
-                        <td>
-                            {props.colTwoContent}
-                            <br />
-                            <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
-                        </td>
-                        <td>{props.colThreeContent}</td>
-                        <th>
-                            {props.actionButton}
-                        </th>
-                    </tr>
+                    {rows.map((rowData, index) => (
+                        <TableRow
+                            key={index}
+                            rowData={rowData}
+                            index={index}
+                            toggleCheckbox={toggleCheckbox}
+                        />
+                    ))}
                 </tbody>
                 {/* foot */}
                 <tfoot>
@@ -53,8 +82,10 @@ const Table = (props) => {
                     </tr>
                 </tfoot>
             </table>
+            {/* TODO just for testing, remove */}
+            <button onClick={addRow}>Add Row</button>
         </div>
-    )
-}
+    );
+};
 
-export default Table
+export default Table;

@@ -82,8 +82,8 @@ export default function Login() {
     };
 
     return (
-        <form className="flex flex-col mt-8 space-y-6">
-            <div className="-sspace-y-px self-center w-1/6">
+        <form className="flex flex-col mt-8 space-y-6 p-12 m-10">
+            <div className="-sspace-y-px self-center w-full">
                 {
                     fields.map(field =>
                         <Input
