@@ -161,7 +161,7 @@ def EditAccount(request):
 
     user = getUser(request)
     data = user.data["user"]
-    
+
     firstname = request.data.get('firstname')
     lastname = request.data.get('lastname')
 
@@ -181,8 +181,7 @@ def email_pass_reset(request):
     
     data = getUser(request)
     user = data.data["user"]
-    
-    
+
     try:
         otpfound = OneTimePassword.objects.get(user_id = user.user_id)
         otpfound.delete()
@@ -256,6 +255,9 @@ def reset_password(request):
     
     Users.objects.filter(user_id=user.user_id).update(password=hashed_password, salt=salt)
     saved_otp.delete()
+    
+    sessionToken = Session.objects.get(user_id=user)
+    sessionToken.delete()
 
     return Response({'message': 'Password Reset'})
 
@@ -288,15 +290,15 @@ def login(request):
 
         try:
 
-            print("d5lt el try")
+            #print("d5lt el try")
             
-            print(user)
+            #print(user)
             
-            print("cookie: " , request.COOKIES.get('token'))
+            #print("cookie: " , request.COOKIES.get('token'))
 
             exist_token = Session.objects.get(user_id=user)
 
-            print("exist_token: " , exist_token)
+            #print("exist_token: " , exist_token)
             
             if exist_token.is_expired():
                 exist_token.delete()
@@ -305,7 +307,7 @@ def login(request):
                 print("da5lt el else")
                 sertoken = SessionSerializer(exist_token)
                 response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
-                response.set_cookie("token", exist_token.token)
+                #response.set_cookie("token", exist_token.token)
                 return response           
         except Session.DoesNotExist:
             pass
@@ -320,9 +322,15 @@ def login(request):
         token.save()
         print("final token: " , token.token)
         tokenser = SessionSerializer(token)
-        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated})
-        response.set_cookie("token", token.token) #expires=token.expires_at        
-
+        headers = {
+        "Authorization":  token.token 
+        }
+        
+        print("header: " , headers )
+        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated}  )#headers = headers
+        #response.set_cookie('token', token.token) #expires=token.expires_at        
+        print(" set cookies el fel 2wel login:  ", token.token)
+        response["header"] = token.token
         
         return response
         
@@ -400,6 +408,7 @@ def upload_pdf(request):
 @custom_auth_required
 def get_document(request, pk):
 
+    
     data = getUser(request)
     user = data.data["user"]
     try:
