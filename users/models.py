@@ -46,15 +46,19 @@ class Documents(models.Model):
     
 
 
-
 class Document_shared(models.Model):
+    class Acceptance(models.TextChoices):
+        ACCEPTED = 'accepted', 'Accepted'
+        REJECTED = 'rejected', 'Rejected'
+        PENDING = 'pending', 'Pending'
     doc_id = models.ForeignKey(Documents, on_delete=models.CASCADE, related_name='shared_docs')
     owner_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='owned_docs')
     parties_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=True)
-    is_accepted = models.BooleanField(default=False)
+    is_accepted = models.CharField(max_length=8, choices=Acceptance.choices, default=Acceptance.PENDING)
 
     class Meta:
         db_table = 'documents_shared'
+
 
 
 class OneTimePassword(models.Model):

@@ -509,8 +509,7 @@ def reject_document(request, doc_id):
     except Document_shared.DoesNotExist:
         return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    docsh_id.is_accepted = False
-    docsh_id.save()
+    Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='rejected')
     return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
 
 
@@ -524,8 +523,7 @@ def confirm_document(request, doc_id):
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
-    doc.is_accepted = True
-    doc.save()
+    Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='accepted')
     
     return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
 
@@ -555,7 +553,7 @@ def get_confirmation(request, doc_id):
     
     accept = False
     for document in docs:
-        if document.is_accepted:
+        if document.is_accepted == 'accepted':
             accept = True
         else:
             accept = False
@@ -565,7 +563,7 @@ def get_confirmation(request, doc_id):
         acc_docs = DocumentSharedSerializer(docs, many=True)
         return Response({'message : All other parties have accepted', acc_docs}, status=status.HTTP_200_OK)
     
-    r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted=False)
+    r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted='rejected')
     rej_docs = DocumentSharedSerializer(r_docs, many=True)
     return Response({'message : Not all other parties have accepted', rej_docs}, status=status.HTTP_200_OK)
 
