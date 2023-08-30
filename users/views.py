@@ -22,11 +22,14 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 import zipfile
 from django.http import FileResponse
+from django.contrib.auth import get_user_model, authenticate, login, logout
 #--------
 
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from DocuSign import settings
+# from rest_framework_jwt.views import obtain_jwt_token
+
 
 #lama y3mel logout delelte token
 #fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
@@ -37,24 +40,47 @@ from DocuSign import settings
 
 
 # register account
+# @api_view(['POST'])
+# def register(request):
+#     try:
+#         # salt = secrets.token_hex(10)
+#         # salted_password = salt + request.data['password']
+#         # hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+		
+        
+#         user = Users.objects.create(
+#             email =  request.data['email'] ,
+#             # password = request.data['password'] ,
+#             firstname = request.data['firstname'],
+#             lastname = request.data['lastname'],
+#             # is_activated = False ,
+#             nid = request.data['nid'],
+#             phone_number = request.data['phone number'],
+#             # salt = salt
+#             )
+#         user.save()
+#         return Response({'message': 'User created'}, status=status.HTTP_201_CREATED) 
+#     except Exception as e:
+#         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
 def register(request):
     try:
-        salt = secrets.token_hex(10)
-        salted_password = salt + request.data['password']
-        hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
-        
-        user = Users.objects.create(
+        # salt = secrets.token_hex(10)
+        # salted_password = salt + request.data['password']
+        # hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+		
+        User = get_user_model()
+        newuser = User.objects._create_user(
             email =  request.data['email'] ,
-            password = hashed_password ,
+            password = request.data['password'] ,
             firstname = request.data['firstname'],
             lastname = request.data['lastname'],
             # is_activated = False ,
             nid = request.data['nid'],
             phone_number = request.data['phone number'],
-            salt = salt
+            # salt = salt
             )
-        user.save()
+        newuser.save()
         return Response({'message': 'User created'}, status=status.HTTP_201_CREATED) 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -262,82 +288,93 @@ def reset_password(request):
     return Response({'message': 'Password Reset'})
 
 
-# login
+# # login
+# @api_view(['POST'])
+# def login(request):
+#     email = request.data.get('email')
+#     password = request.data.get('password')
+    
+#     if email is None or password is None:
+#         if email is None:
+#             return Response({'error': 'Please Enter Email '}, status=status.HTTP_412_PRECONDITION_FAILED)
+#         elif password is None:
+#             return Response({'error': 'Please Enter Password '}, status=status.HTTP_412_PRECONDITION_FAILED)
+    
+#     try:
+#         user = Users.objects.get(email=email) 
+#     except Users.DoesNotExist:
+#         return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+#     salt = user.salt
+#     salted_password = salt + password
+#     hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
+    
+#     if hashed_password == user.password:
+#         userser = UserSerializer(user)
+
+#         print('abl el try')
+
+#         try:
+
+#             #print("d5lt el try")
+            
+#             #print(user)
+            
+#             #print("cookie: " , request.COOKIES.get('token'))
+
+#             exist_token = Session.objects.get(user_id=user)
+
+#             #print("exist_token: " , exist_token)
+            
+#             if exist_token.is_expired():
+#                 exist_token.delete()
+#                 print("expired token deleted")
+#             else:
+#                 print("da5lt el else")
+#                 sertoken = SessionSerializer(exist_token)
+#                 response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_active": user.is_active})
+#                 #response.set_cookie("token", exist_token.token)
+#                 return response           
+#         except Session.DoesNotExist:
+#             pass
+#         except Session.MultipleObjectsReturned:
+#             print("da5lt el except")
+#             tokens = Session.objects.filter(user_id=user)
+#             tokens.delete()
+
+#         print("5alst el except")
+#         token  = Session.objects.create(user_id=user)
+#         token.generate_token()
+#         token.save()
+#         print("final token: " , token.token)
+#         tokenser = SessionSerializer(token)
+#         headers = {
+#         "Authorization":  token.token 
+#         }
+        
+#         print("header: " , headers )
+#         response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_active": user.is_active}  )#headers = headers
+#         #response.set_cookie('token', token.token) #expires=token.expires_at        
+#         print(" set cookies el fel 2wel login:  ", token.token)
+#         response["header"] = token.token
+        
+#         return response
+        
+    
+        
+#     else:
+#         return Response("incorrect password, please try again.")
 @api_view(['POST'])
 def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
-    
-    if email is None or password is None:
-        if email is None:
-            return Response({'error': 'Please Enter Email '}, status=status.HTTP_412_PRECONDITION_FAILED)
-        elif password is None:
-            return Response({'error': 'Please Enter Password '}, status=status.HTTP_412_PRECONDITION_FAILED)
-    
-    try:
-        user = Users.objects.get(email=email) 
-    except Users.DoesNotExist:
-        return Response({'error': 'Email not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-    salt = user.salt
-    salted_password = salt + password
-    hashed_password = hashlib.sha512(salted_password.encode()).hexdigest()
-    
-    if hashed_password == user.password:
-        userser = UserSerializer(user)
-
-        print('abl el try')
-
-        try:
-
-            #print("d5lt el try")
-            
-            #print(user)
-            
-            #print("cookie: " , request.COOKIES.get('token'))
-
-            exist_token = Session.objects.get(user_id=user)
-
-            #print("exist_token: " , exist_token)
-            
-            if exist_token.is_expired():
-                exist_token.delete()
-                print("expired token deleted")
-            else:
-                print("da5lt el else")
-                sertoken = SessionSerializer(exist_token)
-                response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_active": user.is_active})
-                #response.set_cookie("token", exist_token.token)
-                return response           
-        except Session.DoesNotExist:
-            pass
-        except Session.MultipleObjectsReturned:
-            print("da5lt el except")
-            tokens = Session.objects.filter(user_id=user)
-            tokens.delete()
-
-        print("5alst el except")
-        token  = Session.objects.create(user_id=user)
-        token.generate_token()
-        token.save()
-        print("final token: " , token.token)
-        tokenser = SessionSerializer(token)
-        headers = {
-        "Authorization":  token.token 
-        }
-        
-        print("header: " , headers )
-        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_active": user.is_active}  )#headers = headers
-        #response.set_cookie('token', token.token) #expires=token.expires_at        
-        print(" set cookies el fel 2wel login:  ", token.token)
-        response["header"] = token.token
-        
-        return response
-        
-        
+    user = authenticate(request=request._request, email=email, password=password)
+    if user is not None:
+        login(request._request, user)
+        # token = obtain_jwt_token(user)
+        return Response({'token': 'token'}, status=status.HTTP_202_ACCEPTED)
     else:
-        return Response("incorrect password, please try again.")
-    
+        return Response({'message' : 'invalid login'}, status=status.HTTP_400_BAD_REQUEST)    
 
 @custom_auth_required
 @api_view(['POST'])
