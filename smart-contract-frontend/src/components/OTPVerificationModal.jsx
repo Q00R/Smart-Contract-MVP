@@ -36,7 +36,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
 
             // Send the concatenated OTP to the server for validation
             const response = await fetch('http://localhost:8000/api/users/verifyOTP/', {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     "SID": Cookies.get('token'), // Include the token in the custom "SID" header
@@ -98,7 +98,6 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                 <p>Email Verification</p>
                             </div>
                             <div class="flex flex-row text-sm font-medium text-base-content">
-                                {/* TODO change to real mail */}
                                 <p>We have sent a code to your email {userEmail}</p>
                             </div>
                         </div>
@@ -151,12 +150,14 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                     </div>
 
                                     <div class="flex flex-col space-y-5">
+                                        {/* TODO redirects for some reason */}
                                         <button onClick={() => handleVerify()} class="btn btn-primary btn-md">
                                             Verify Account
                                         </button>
                                         <button className='btn btn-outline btn-md' onClick={onRequestClose}>Close</button>
                                         <p className='self-center'>{verificationStatus}</p>
                                         <div class="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-base-content">
+                                            {/* TODO also redirects */}
                                             <p>Didn't recieve code?</p> <button class="flex flex-row items-center text-primary" onClick={sendOTP}>Resend</button>
                                         </div>
                                     </div>
