@@ -25,7 +25,14 @@ function toggleMode() {
 
 const footer = () => {
     return (
-        <div className="flex flex-col mt-32">
+        <div
+            onLoad={() => {
+                document.documentElement.setAttribute(
+                    "data-theme",
+                    localStorage.getItem("theme")
+                );
+            }}
+            className="flex flex-col mt-32">
             <button
                 id="toggleMode"
                 onClick={toggleMode}

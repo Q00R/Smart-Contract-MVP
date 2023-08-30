@@ -27,12 +27,6 @@ export default function Login() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleSignup = () => {
-        // Perform signup logic
-        // After successful signup, open the OTP modal
-        setIsModalOpen(true);
-    };
-
     const handleCloseModal = () => {
         setIsModalOpen(false);
     };
@@ -55,7 +49,8 @@ export default function Login() {
             const data = await response.json();
             console.log(data);
 
-            Cookies.set('token', data.token['token']);
+            //set cookie expiration to 1 hour
+            Cookies.set('token', data.token['token'], { expires: 1 / 24 });
 
             if (!data.is_activated) {
                 console.log("user is not active");
@@ -119,7 +114,6 @@ export default function Login() {
                 <FormExtra />
                 <FormAction handleSubmit={handleSubmit} text="Login" />
                 <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} userEmail={loginState['email-address']} />
-
             </div>
         </form>
     )
