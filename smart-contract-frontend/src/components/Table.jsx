@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TableRow from './TableRow';
+import Cookies from 'js-cookie';
 
 const Table = (props) => {
     const [selectAll, setSelectAll] = useState(false);
@@ -39,8 +40,52 @@ const Table = (props) => {
         setRows(updatedRows);
     };
 
+
+    const loadRows = async () => {
+
+        try {
+
+            fetch('http://localhost:8000/api/users/documents/', {
+                method: 'GET',
+                headers: {
+                    'SID': Cookies.get('token'),
+                },
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    setRowData(data);
+                });
+        } catch (error) {
+            console.error('Error Loading files:', error);
+        }
+    };
+
+    useEffect(() => {
+        loadRows();
+    }, []);
+
+    const setRowData = async (data) => {
+
+        const updatedRows = [...rows];
+
+        for (let i = 0; i < data.length; i++) {
+            const newRow = {
+                isChecked: false,
+                colOneContent: data[i].name,
+                colTwoContent: data[i].email,
+                colThreeContent: data[i].status,
+                actionButton: props.actionButton,
+            };
+            updatedRows.push(newRow);
+        }
+
+        setRows(updatedRows);
+    };
+
+
+
     return (
-        <div className="overflow-x-auto m-5">
+        <div className="overflow-x-auto m-5" onLoad={loadRows}>
             <table className="table w-full h-full">
                 {/* head */}
                 <thead>

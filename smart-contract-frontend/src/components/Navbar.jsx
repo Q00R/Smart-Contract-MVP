@@ -28,8 +28,6 @@ const navbar = () => {
         }
     }
 
-
-
     return (
         <div
             onLoad={() => {

@@ -11,6 +11,7 @@ const Dashboard = () => {
     return (
         <div className="flex flex-col">
 
+
             <div className="container rounded-lg shadow-xl border-2 self-center w-1/2 my-5 p-10">
                 <Header
                     imgSrc={uploadImage}

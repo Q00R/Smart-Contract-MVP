@@ -36,6 +36,7 @@ const UploadPDF = () => {
 
             const data = await response.json();
             console.log(data);
+            window.location.reload();
 
         } catch (error) {
             console.error('Error uploading file:', error);
