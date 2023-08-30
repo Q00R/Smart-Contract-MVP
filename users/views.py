@@ -49,7 +49,7 @@ def register(request):
             password = hashed_password ,
             firstname = request.data['firstname'],
             lastname = request.data['lastname'],
-            is_activated = False ,
+            # is_activated = False ,
             nid = request.data['nid'],
             phone_number = request.data['phone number'],
             salt = salt
@@ -67,7 +67,7 @@ def activate(request):
     data = getUser(request)
     user = data.data["user"]
     
-    if user.is_activated:
+    if user.is_active:
         return Response({'Message': 'User already activated'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     try:
@@ -112,7 +112,7 @@ def verify_otp(request):
     data = getUser(request)
     user = data.data["user"]
     
-    if user.is_activated:
+    if user.is_active:
         return Response("User is already activated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     if user_otps is None:
@@ -132,7 +132,7 @@ def verify_otp(request):
         saved_otp.delete()
         return Response("OTP is expired. Please regenerate another OTP.")
     
-    user.is_activated = True
+    user.is_active = True
     user.save()
     saved_otp.delete()
     
@@ -146,10 +146,10 @@ def deactivate(request):
     data = getUser(request)
     user = data.data["user"]
     
-    if not user.is_activated:
+    if not user.is_active:
         return Response("User is already deactivated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-    Users.objects.filter(user_id=user.user_id).update(is_activated=False)
+    Users.objects.filter(user_id=user.user_id).update(is_active=False)
 
     return Response({'message': 'Account is deacivated'})
 # -------------------------------------------------------------------------------------------------------------
@@ -306,7 +306,7 @@ def login(request):
             else:
                 print("da5lt el else")
                 sertoken = SessionSerializer(exist_token)
-                response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
+                response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_active": user.is_active})
                 #response.set_cookie("token", exist_token.token)
                 return response           
         except Session.DoesNotExist:
@@ -327,7 +327,7 @@ def login(request):
         }
         
         print("header: " , headers )
-        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated}  )#headers = headers
+        response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_active": user.is_active}  )#headers = headers
         #response.set_cookie('token', token.token) #expires=token.expires_at        
         print(" set cookies el fel 2wel login:  ", token.token)
         response["header"] = token.token
