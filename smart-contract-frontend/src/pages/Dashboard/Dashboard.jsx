@@ -3,6 +3,8 @@ import UploadPDF from '../../components/UploadPDF';
 import Table from '../../components/Table';
 import Header from '../../components/Header';
 import documentsImage from '../../Assets/documentsImage.png'
+import uploadImage from '../../Assets/UploadImage.png'
+
 
 const Dashboard = () => {
 
@@ -11,7 +13,7 @@ const Dashboard = () => {
 
             <div className="container rounded-lg shadow-xl border-2 self-center w-1/2 my-5 p-10">
                 <Header
-                    // imgSrc={documentsImage}
+                    imgSrc={uploadImage}
                     heading="Upload Documents"
                 />
                 <UploadPDF />
