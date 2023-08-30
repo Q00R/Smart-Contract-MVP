@@ -3,12 +3,7 @@ import Modal from 'react-modal';
 import Cookies from 'js-cookie';
 
 function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
-    const [otp, setOTP] = useState('');
     const [verificationStatus, setVerificationStatus] = useState('');
-
-    const handleOTPChange = (event) => {
-        setOTP(event.target.value);
-    };
 
     const handleDigitChange = (event, nextField) => {
         const input = event.target;
@@ -35,18 +30,22 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
             const digit4 = document.getElementById('Digit_4').value;
 
             // Concatenate the digits into the OTP
-            const enteredOTP = digit1 + digit2 + digit3 + digit4;
+            const enteredOTP = digit1 + digit2 + digit3 + digit4 + "";
+
+            console.log(enteredOTP);
 
             // Send the concatenated OTP to the server for validation
             const response = await fetch('http://localhost:8000/api/users/verifyOTP/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
                 },
                 body: JSON.stringify({ otp: enteredOTP }),
             });
 
             const data = await response.json();
+            console.log(data);
 
             if (data.success) {
                 setVerificationStatus('OTP verified successfully!');
@@ -90,14 +89,6 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
 
 
     return (
-
-        // <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
-        //     <div className="flex flex-col">
-        //         <input type="text" value={otp} onChange={handleOTPChange} />
-        //         <button onClick={handleVerify}>Verify OTP</button>
-        //         <p>{verificationStatus}</p>
-        //     </div>
-        // </Modal>
         <Modal className={'overflow-hidden'} isOpen={isOpen} onRequestClose={onRequestClose}>
             <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-100 py-12">
                 <div class="relative px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
@@ -160,7 +151,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                     </div>
 
                                     <div class="flex flex-col space-y-5">
-                                        <button onClick={handleVerify} class="btn btn-primary btn-md">
+                                        <button onClick={() => handleVerify()} class="btn btn-primary btn-md">
                                             Verify Account
                                         </button>
                                         <button className='btn btn-outline btn-md' onClick={onRequestClose}>Close</button>

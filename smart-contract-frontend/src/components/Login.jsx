@@ -25,7 +25,7 @@ export default function Login() {
         await authenticateUser();
     }
 
-    const [isModalOpen, setIsModalOpen] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSignup = () => {
         // Perform signup logic
