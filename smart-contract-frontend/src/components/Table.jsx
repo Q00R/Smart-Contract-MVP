@@ -41,7 +41,8 @@ const Table = (props) => {
     };
 
 
-    const loadRows = async () => {
+    //gets all the user documents
+    const getDocuments = async () => {
 
         try {
 
@@ -54,38 +55,45 @@ const Table = (props) => {
                 .then(data => {
                     console.log(data);
                     setRowData(data);
+                    return data;
                 });
         } catch (error) {
             console.error('Error Loading files:', error);
         }
     };
 
+    //gets the details of a specific document
+    const getDocumentDetails = async (documentId) => {
+
+        try {
+            fetch('http://localhost:8000/api/documents/' + documentId + '/retrieve_details/', {
+                method: 'GET',
+                headers: {
+                    'SID': Cookies.get('token'),
+                },
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    return data;
+                });
+        }
+        catch (error) {
+            console.error('Error Loading files:', error);
+        }
+    };
+
     useEffect(() => {
-        loadRows();
+        getDocumentDetails(5);
     }, []);
 
-    const setRowData = async (data) => {
+    const setRowData = async () => {
 
-        const updatedRows = [...rows];
-
-        for (let i = 0; i < data.length; i++) {
-            const newRow = {
-                isChecked: false,
-                colOneContent: data[i].name,
-                colTwoContent: data[i].email,
-                colThreeContent: data[i].status,
-                actionButton: props.actionButton,
-            };
-            updatedRows.push(newRow);
-        }
-
-        setRows(updatedRows);
     };
 
 
 
     return (
-        <div className="overflow-x-auto m-5" onLoad={loadRows}>
+        <div className="overflow-x-auto m-5" onLoad={getDocuments}>
             <table className="table w-full h-full">
                 {/* head */}
                 <thead>
