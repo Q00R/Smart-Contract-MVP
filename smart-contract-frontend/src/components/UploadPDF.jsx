@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import FileInput from './FileInput';
 import FormAction from './FormAction';
+import Cookies from 'js-cookie';
+
 
 const UploadPDF = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -20,10 +22,15 @@ const UploadPDF = () => {
         try {
             const formData = new FormData();
             formData.append('document_file', selectedFile);
+            console.log(Cookies.get('token'));
+
 
             // Perform the file upload here
             const response = await fetch('http://localhost:8000/api/documents/upload/', {
                 method: 'POST',
+                headers: {
+                    'SID': Cookies.get('token'),
+                },
                 body: formData,
             });
 

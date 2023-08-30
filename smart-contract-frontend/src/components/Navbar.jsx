@@ -1,10 +1,35 @@
 import React from 'react'
 import logo from "../Assets/logo.png"
 import userIcon from "../Assets/user.png"
+import Cookies from 'js-cookie'
 
 
 
 const navbar = () => {
+
+    const handleUser = () => {
+        //if there is a user logged in, show the user's profile page
+        //else show the login page
+        if (Cookies.get('token')) {
+            window.location.href = '/profile'
+        } else {
+            window.location.href = '/login'
+
+        }
+    }
+
+    const handleLogo = () => {
+        //if there is a user logged in, show the user's dashboard
+        //else show the home page
+        if (Cookies.get('token')) {
+            window.location.href = '/dashboard'
+        } else {
+            window.location.href = '/'
+        }
+    }
+
+
+
     return (
         <div
             onLoad={() => {
@@ -17,13 +42,13 @@ const navbar = () => {
         >
             <div className="navbar bg-base-100">
                 <div className="navbar-start">
-                    <a href="/" className="normal-case text-xl">
+                    <a onClick={handleLogo} className="normal-case text-xl">
                         <img src={logo} className='w-16 h-16' />
                     </a>
                 </div>
             </div>
             <div className="navbar-end">
-                <a id="loginIcon" href='/login'>
+                <a onClick={handleUser}>
                     <img src={userIcon} className='w-14 h-14 mx-5' />
                 </a>
             </div>
