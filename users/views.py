@@ -27,8 +27,9 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from DocuSign import settings
+from django.utils import timezone 
 
-#lama y3mel logout delelte token
+#lama y3mel logout delete token
 #fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
 
 # make an api/function to search on the parties and see if they have accepted or not before publishing
@@ -363,6 +364,10 @@ def upload_pdf(request):
     data = getUser(request)
     user = data.data["user"]
     
+    if not user.is_activated:
+        return Response({'message' : 'User is not activated'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+
     if 'document_file' in request.data:
         pdf_file = request.data['document_file']
         pdf_content = pdf_file.read()
@@ -378,8 +383,9 @@ def upload_pdf(request):
                 return Response({'message': 'File already uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
         except Documents.DoesNotExist:
             pass
-        document = Documents(user=user, document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
+        document = Documents(user=user, document_name = pdf_file.name ,document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
         document.save()
+        
                 
         if 'email_list' in request.data:
             list_of_gmail = request.get["email_list"] 
@@ -387,13 +393,16 @@ def upload_pdf(request):
                 print("email: " , email)
                 try:
                     party = Users.objects.get(email=email)
+                    if not party.is_activated:
+                        message += f'Email {party.email} is not active, '
+                        continue
                 except Users.DoesNotExist:
                     return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
                 doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
                 try:
                     exist_ds = Document_shared.objects.filter(doc_id=document, owner_id = user, parties_id = party)
                     if exist_ds:
-                        message += f'Email {party.email} was already added'
+                        message += f'Email {party.email} was already added, '
                         continue
                 except Document_shared.DoesNotExist:
                     pass
@@ -436,6 +445,7 @@ def get_document(request, pk):
     
     return response
 
+# still need to edit when using the BC
 @api_view(['GET'])
 @custom_auth_required
 def get_document_details(request, pk):
@@ -509,8 +519,7 @@ def reject_document(request, doc_id):
     except Document_shared.DoesNotExist:
         return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    docsh_id.is_accepted = False
-    docsh_id.save()
+    Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='rejected', time_a_r = timezone.now())
     return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
 
 
@@ -524,8 +533,7 @@ def confirm_document(request, doc_id):
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
-    doc.is_accepted = True
-    doc.save()
+    Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='accepted', time_a_r = timezone.now())
     
     return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
 
@@ -543,19 +551,29 @@ def getUser(request):
     except Session.DoesNotExist:
         return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
     
+
+# Change this to a normal method 
 @custom_auth_required
 @api_view(['GET'])
 def get_confirmation(request, doc_id):
     data = getUser(request)
     user = data.data["user"]
+
     try:
         docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
-    except Documents.DoesNotExist:
-        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Document_shared.DoesNotExist:
+        try:
+            documents = Documents.objects.get(document_id=doc_id, user=user)
+        except Documents.DoesNotExist:
+            return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if documents:
+            doc_ser = DocumentSerializer(documents)
+            return Response({'message : Document is Acceepted. You are the only party', doc_ser.data}, status=status.HTTP_200_OK)
+            
     
     accept = False
     for document in docs:
-        if document.is_accepted:
+        if document.is_accepted == 'accepted':
             accept = True
         else:
             accept = False
@@ -563,9 +581,36 @@ def get_confirmation(request, doc_id):
     
     if accept:
         acc_docs = DocumentSharedSerializer(docs, many=True)
-        return Response({'message : All other parties have accepted', acc_docs}, status=status.HTTP_200_OK)
+        return Response({'message : All other parties have accepted', acc_docs.data}, status=status.HTTP_200_OK)
     
-    r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted=False)
+    r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted='rejected')
     rej_docs = DocumentSharedSerializer(r_docs, many=True)
-    return Response({'message : Not all other parties have accepted', rej_docs}, status=status.HTTP_200_OK)
+    return Response({'message : Not all other parties have accepted', rej_docs.data}, status=status.HTTP_200_OK)
 
+
+@api_view(['GET'])
+@custom_auth_required
+def get_all_shared(request, doc_id):
+    data = getUser(request)
+    user = data.data["user"]
+
+    try:
+        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
+        docs_ser = DocumentSharedSerializer(docs, many=True)
+        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
+    except Document_shared.DoesNotExist:
+        return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@custom_auth_required
+def get_shared_with_user(request):
+    data = getUser(request)
+    user = data.data["user"]
+
+    try:
+        docs = Document_shared.objects.filter(parties_id=user)
+        docs_ser = DocumentSharedSerializer(docs, many=True)
+        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
+    except Document_shared.DoesNotExist:
+        return Response({'message' : 'You do not have any documents shared with you.'}, status=status.HTTP_404_NOT_FOUND)
