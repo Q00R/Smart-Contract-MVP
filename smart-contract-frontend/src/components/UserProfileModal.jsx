@@ -18,7 +18,7 @@ const UserProfileModal = ({ isOpen, onRequestClose }) => {
                                 <p>We have sent a code to your email</p>
 
                                 <button onClick={onRequestClose} className="absolute top-0 left-0 m-2 w-10 h-10">
-                                    <img src={goBackIcon} />
+                                    <img src={goBackIcon} alt='go back' />
 
                                 </button>
                             </div>

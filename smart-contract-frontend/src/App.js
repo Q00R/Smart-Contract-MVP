@@ -8,16 +8,16 @@ import React, { useEffect } from 'react';
 import Cookies from 'js-cookie';
 
 function App() {
-  useEffect(() => {
-    // Check if the token exists in cookies or local storage
-    const token = Cookies.get('token'); // You can replace 'token' with your actual token key
-    // const token = localStorage.getItem('token'); // Alternatively, use local storage
+  // useEffect(() => {
+  //   // Check if the token exists in cookies or local storage
+  //   const token = Cookies.get('token'); // You can replace 'token' with your actual token key
+  //   // const token = localStorage.getItem('token'); // Alternatively, use local storage
 
-    // If token doesn't exist, you can use the <Navigate /> component to redirect
-    if (!token) {
-      return <Navigate to="/login" />;
-    }
-  }, []); // Empty dependency array to run the effect only once
+  //   // If token doesn't exist, you can use the <Navigate /> component to redirect
+  //   if (!token) {
+  //     return <Navigate to="/login" />;
+  //   }
+  // }, []); // Empty dependency array to run the effect only once
 
   return (
     <Router>

@@ -12,7 +12,7 @@ const Navbar = () => {
         setIsModalOpen(false);
     };
 
-    const handleUser = () => {
+    const handleOpenModal = () => {
         console.log(Cookies.get('token'));
         // If there is a user logged in, open the user profile modal
         if (Cookies.get('token')) {
@@ -47,7 +47,7 @@ const Navbar = () => {
                 </div>
             </div>
             <div className="navbar-end">
-                <button onClick={handleUser}>
+                <button onClick={handleOpenModal}>
                     <img src={userIcon} className='w-14 h-14 mx-5' alt="User" />
                 </button>
             </div>
