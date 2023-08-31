@@ -29,7 +29,7 @@ from django.core.mail import EmailMessage
 from DocuSign import settings
 from django.utils import timezone 
 
-#lama y3mel logout delelte token
+#lama y3mel logout delete token
 #fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
 
 # make an api/function to search on the parties and see if they have accepted or not before publishing
@@ -383,7 +383,7 @@ def upload_pdf(request):
                 return Response({'message': 'File already uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
         except Documents.DoesNotExist:
             pass
-        document = Documents(user=user, document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
+        document = Documents(user=user, document_name = pdf_file.name ,document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
         document.save()
         
                 
