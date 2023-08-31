@@ -56,6 +56,7 @@ class Document_shared(models.Model):
     owner_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='owned_docs')
     parties_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=True)
     is_accepted = models.CharField(max_length=8, choices=Acceptance.choices, default=Acceptance.PENDING)
+    time_a_r = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'documents_shared'
