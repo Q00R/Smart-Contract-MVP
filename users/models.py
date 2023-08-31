@@ -35,7 +35,7 @@ class Documents(models.Model):
     document_name = models.TextField(null=True, blank=True)
     document_file = models.FileField(upload_to='documents/', null=True ,blank=True)
     timestamp = models.DateTimeField(default=timezone.now)
-    is_completed = models.BooleanField() 
+    is_completed = models.BooleanField() # happens when the transaction is complete on the BC
 
     class Meta:
         db_table = 'documents'
