@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
+import Cookies from 'js-cookie';
+import goBackIcon from "../Assets/GoBackImage.png";
 
 const UserProfileModal = ({ isOpen, onRequestClose }) => {
 
@@ -11,11 +13,14 @@ const UserProfileModal = ({ isOpen, onRequestClose }) => {
                         <div class="flex flex-col items-center justify-center text-center space-y-2">
                             <div class="font-semibold text-3xl">
                                 <p>Email Verification</p>
-                                <button onClick={onRequestClose} className="bg-white absolute top-0 right-0 m-5">
-                                </button>
                             </div>
                             <div class="flex flex-row text-sm font-medium text-base-content">
                                 <p>We have sent a code to your email</p>
+
+                                <button onClick={onRequestClose} className="absolute top-0 left-0 m-2 w-10 h-10">
+                                    <img src={goBackIcon} />
+
+                                </button>
                             </div>
                         </div>
 

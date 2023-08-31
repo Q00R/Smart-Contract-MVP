@@ -12,7 +12,6 @@ const Navbar = () => {
         setIsModalOpen(false);
     };
 
-
     const handleUser = () => {
         console.log(Cookies.get('token'));
         // If there is a user logged in, open the user profile modal
@@ -34,10 +33,6 @@ const Navbar = () => {
             // Redirect to home page
             window.location.href = '/';
         }
-    };
-
-    const closeUserProfileModal = () => {
-        setIsModalOpen(false);
     };
 
     return (
