@@ -1,6 +1,7 @@
 
 import json
-from django.shortcuts import render , redirect
+from django.shortcuts import render , redirect, HttpResponse
+from django.http import HttpRequest
 
 from rest_framework.decorators import api_view , permission_classes, parser_classes
 
@@ -369,10 +370,12 @@ def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
     user = authenticate(request=request._request, email=email, password=password)
+    print("user:", user)
     if user is not None:
-        login(request._request, user)
+        request = HttpRequest(request)
+        login(request, user=user)
         # token = obtain_jwt_token(user)
-        return Response({'token': 'token'}, status=status.HTTP_202_ACCEPTED)
+        return Response({'session': request.session}, status=status.HTTP_202_ACCEPTED)
     else:
         return Response({'message' : 'invalid login'}, status=status.HTTP_400_BAD_REQUEST)    
 
