@@ -9,18 +9,18 @@ const UserprofileCard = () => {
                 <h3 class="text-center text-2xl text-base-content font-medium leading-8">{
                     user.firstname + " " + user.lastname
                 }</h3>
-                <table class="text-xl my-10 mx-5">
+                <table class="text-2xl my-10 mx-5">
                     <tbody>
                         <tr>
-                            <td class="px-2 py-2 text-base-content font-semibold">Phone</td>
+                            <td class="px-2 py-2 text-base-content font-semibold">Phone:</td>
                             <td class="px-2 py-2">{user.phone_number}</td>
                         </tr>
                         <tr>
-                            <td class="px-2 py-2 text-base-content font-semibold">Email</td>
+                            <td class="px-2 py-2 text-base-content font-semibold">Email:</td>
                             <td class="px-2 py-2">{user.email}</td>
                         </tr>
                         <tr>
-                            <td class="px-2 py-2 text-base-content font-semibold">National ID</td>
+                            <td class="px-2 py-2 text-base-content font-semibold">National ID:</td>
                             <td class="px-2 py-2">{user.nid}</td>
                         </tr>
                         <tr>

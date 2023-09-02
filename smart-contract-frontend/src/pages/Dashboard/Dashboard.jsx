@@ -7,7 +7,6 @@ import uploadImage from '../../Assets/UploadImage.png'
 
 
 const Dashboard = () => {
-
     return (
         <div className="flex flex-col">
 
