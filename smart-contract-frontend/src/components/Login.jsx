@@ -49,6 +49,9 @@ export default function Login() {
             const data = await response.json();
             console.log(data);
 
+            // save user info in local storage
+            localStorage.setItem('user', JSON.stringify(data.user));
+
             //set cookie expiration to 1 hour
             Cookies.set('token', data.token['token'], { expires: 1 / 24 });
 
