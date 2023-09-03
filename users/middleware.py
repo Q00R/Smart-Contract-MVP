@@ -7,7 +7,9 @@ from rest_framework.response import Response
 def custom_auth_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
+        
         session_response = get_session_token(request)
+        print("session_response ely fel middl: " , session_response.data)
         
         if isinstance(session_response, Response):
             sessionToken = session_response.data
@@ -30,11 +32,11 @@ def custom_auth_required(view_func):
 
 
 def get_session_token(request):
-    session_token = request.COOKIES.get('token')
-    
-    if session_token:
+    session_id = request.META.get("HTTP_SID")
+    print("session_id fghjkl:", session_id)
+    if session_id:
         try:
-            session = Session.objects.get(token=session_token)
+            session = Session.objects.get(token=session_id)
 
             print("deeh el session: " , session)
             

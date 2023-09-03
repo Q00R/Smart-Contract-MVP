@@ -32,9 +32,10 @@ class Documents(models.Model):
     document_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     document_hash = models.TextField()
+    document_name = models.TextField(null=True, blank=True)
     document_file = models.FileField(upload_to='documents/', null=True ,blank=True)
     timestamp = models.DateTimeField(default=timezone.now)
-    is_completed = models.BooleanField() 
+    is_completed = models.BooleanField() # happens when the transaction is complete on the BC
 
     class Meta:
         db_table = 'documents'
@@ -46,15 +47,20 @@ class Documents(models.Model):
     
 
 
-
 class Document_shared(models.Model):
+    class Acceptance(models.TextChoices):
+        ACCEPTED = 'accepted', 'Accepted'
+        REJECTED = 'rejected', 'Rejected'
+        PENDING = 'pending', 'Pending'
     doc_id = models.ForeignKey(Documents, on_delete=models.CASCADE, related_name='shared_docs')
     owner_id = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='owned_docs')
     parties_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=True)
-    is_accepted = models.BooleanField(default=False)
+    is_accepted = models.CharField(max_length=8, choices=Acceptance.choices, default=Acceptance.PENDING)
+    time_a_r = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'documents_shared'
+
 
 
 class OneTimePassword(models.Model):
