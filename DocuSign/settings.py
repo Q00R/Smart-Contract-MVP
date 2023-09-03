@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,8 +56,19 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Update this with your frontend URL
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',  # Add this line
+    'SID',
+    # ...other headers
 ]
 
 ROOT_URLCONF = 'DocuSign.urls'
@@ -137,11 +149,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# path = Path('.env')
-# load_dotenv(dotenv_path=path)
+path = Path('.env')
+load_dotenv(dotenv_path=path)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT =  587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_USER') 
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS') 
+EMAIL_HOST_USER = os.getenv('EMAIL_USER') 
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS') 
