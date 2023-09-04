@@ -410,11 +410,15 @@ def upload_pdf(request):
                     pass
                 doc_shared.save()
                 subject = f'An invitation to a Contract from {user.email}'
-                link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
-                link_mssg = f'The user {user.firstname} {user.lastname} has offered you a contract in ehich you can review and accept or reject in the below link'
+                # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
+                link = reverse('example', kwargs={"pk" : doc_shared.id})
+                full_link = 'http://localhost:3000' + link
+                print("link:", full_link)
+                link_mssg = f"The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link <a href='{full_link}'>Click Here</a>"
                 recipient_list = [party.email]
                 print("user.email: " , party.email)
                 email = EmailMessage(subject, link_mssg, settings.EMAIL_HOST_USER, recipient_list)
+                email.content_subtype = "html"
                 try:
                     email.send() 
                     message += f'Email sent to {party.email}'
