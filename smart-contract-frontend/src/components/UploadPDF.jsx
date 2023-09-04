@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import FileInput from './FileInput';
+import EmailInput from './EmailInput';
 import FormAction from './FormAction';
 import Cookies from 'js-cookie';
 
@@ -45,7 +46,11 @@ const UploadPDF = () => {
 
     return (
         <div>
+
+            <EmailInput />
+
             <FileInput onFileChange={handleFileChange} />
+
             <FormAction handleSubmit={handleSubmit} text="Upload" />
         </div>
     );
