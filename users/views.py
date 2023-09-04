@@ -556,27 +556,26 @@ def calculate_pdf_hash(pdf_file):
 def example(request, pk):
     
     data = getUser(request)
-    print("data from request:", data)
     user = data.data["user"]
-    print("user from data:", user)
     
     shared_doc = Document_shared.objects.get(id = pk)
-    doc = shared_doc.doc_id
-    pid = shared_doc.parties_id
-    owner = shared_doc.owner_id
-    
-    print("doc id: ", doc.document_id)
-    print("user id: ", user.user_id)
-    print("parties_id: ", pid.user_id)
-    print("owner_id: ", owner.user_id)
-    if pid.user_id != user.user_id:
-        return Response('Error')
-    
-    print("mesa mesa")
+    doc_id = shared_doc.doc_id.document_id
 
-    ser = DocumentSharedSerializer(shared_doc)
+    doc = Documents.objects.get(document_id = doc_id)
+    print("doc: " , doc)
     
-    return Response( ser.data , status=status.HTTP_200_OK)
+    if shared_doc.parties_id.user_id != user.user_id:
+        return Response('Error')
+
+    #send both the doc and the shared doc
+    doc_ser = DocumentSerializer(doc)
+    shared_doc_ser = DocumentSharedSerializer(shared_doc)
+    ser = {
+        "doc" : doc_ser.data,
+        "shared_doc" : shared_doc_ser.data
+    } 
+
+    return Response( ser , status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def example_api(request):

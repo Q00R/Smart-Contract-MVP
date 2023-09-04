@@ -28,6 +28,7 @@ const ReviewDocument = () => {
                 console.log('data', data);
                 console.log('Success:', data);
                 setDocumentID(data['doc_id']);
+                setDocumentTitle(data['doc']['document_name']);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -41,6 +42,7 @@ const ReviewDocument = () => {
             <h1>Review Document Page</h1>
             <p>Doc share ID: {doc_id}</p>
             <p>Doc ID: {documentID}</p>
+            <p>Doc Title: {documentTitle}</p>
             {/* Rest of your ReviewDocument component */}
         </div>
     );
