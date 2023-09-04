@@ -4,6 +4,7 @@ import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
 import Dashboard from './pages/Dashboard/Dashboard';
+import ReviewDocument from './pages/ReviewDocument/ReviewDocument';
 import React from 'react';
 import Cookies from 'js-cookie';
 
@@ -22,6 +23,9 @@ function App() {
           }
         />
         <Route path="*" element={<Home />} />
+        <Route path="/review-share-doc:doc_id" element={
+          // Check if the user is logged in, and if not, navigate to the login page
+          Cookies.get('token') ? <ReviewDocument /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );
