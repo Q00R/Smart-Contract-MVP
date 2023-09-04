@@ -28,6 +28,8 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from DocuSign import settings
 from django.utils import timezone 
+from django.urls import reverse
+
 
 #lama y3mel logout delete token
 #fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
@@ -84,14 +86,13 @@ def activate(request):
     otp.generate_OTP()
     otp.save()
     
-    
     subject = 'Your OTP for Email Verification'
     message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
-    print("user.email: " , user.email)
-    email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
-    print("Sending email: " , settings.EMAIL_HOST_USER)
-    print("Sending email pass: " , settings.EMAIL_HOST_PASSWORD)
+    # print("user.email: " , user.email)
+    email = EmailMessage(subject, message, from_email= settings.EMAIL_HOST_USER, to=recipient_list)
+    # print("Sending email: " , settings.EMAIL_HOST_USER)
+    # print("Sending email pass: " , settings.EMAIL_HOST_PASSWORD)
 
 
 
@@ -364,6 +365,7 @@ def upload_pdf(request):
     data = getUser(request)
     user = data.data["user"]
     
+    
     if not user.is_activated:
         return Response({'message' : 'User is not activated'}, status=status.HTTP_401_UNAUTHORIZED)
     
@@ -388,7 +390,7 @@ def upload_pdf(request):
         
                 
         if 'email_list' in request.data:
-            list_of_gmail = request.get["email_list"] 
+            list_of_gmail = request.data["email_list"] 
             for email in list_of_gmail:
                 print("email: " , email)
                 try:
@@ -407,11 +409,56 @@ def upload_pdf(request):
                 except Document_shared.DoesNotExist:
                     pass
                 doc_shared.save()
-                
+                # subject = f'An invitation to a Contract from {user.email}'
+                # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
+                # link_mssg = f'The user {user.firstname} {user.lastname} has offered you a contract in ehich you can review and accept or reject in the below link'
+                # recipient_list = [party.email]
+                # print("user.email: " , party.email)
+                # email = EmailMessage(subject, link_mssg, settings.EMAIL_HOST_USER, recipient_list)
+            else:
+                return Response({'message' : 'emails were not provided'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'PDF uploaded and compressed successfully.' + message}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
+
+@custom_auth_required
+@api_view(['POST'])
+def email_add(request, doc_id):
+    data = getUser(request)
+    user = data.data["user"]
+
+    try:
+        document = Documents.objects.get(document_id=doc_id, user=user)
+    except Documents.DoesNotExist:
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if 'email_list' in request.data:
+        list_of_gmail = request.data["email_list"] 
+        for email in list_of_gmail:
+            print("email: " , email)
+            try:
+                party = Users.objects.get(email=email)
+                if not party.is_activated:
+                    message += f'Email {party.email} is not active, '
+                    continue
+            except Users.DoesNotExist:
+                return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+            doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
+            try:
+                exist_ds = Document_shared.objects.filter(doc_id=document, owner_id = user, parties_id = party)
+                if exist_ds:
+                    message += f'Email {party.email} was already added, '
+                    continue
+            except Document_shared.DoesNotExist:
+                pass
+            doc_shared.save()
+        return Response({'message' : 'emails added'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response({'message' : 'emails not added'}, status=status.HTTP_400_BAD_REQUEST)
+
+            
+        
 
 @api_view(['GET'])
 @custom_auth_required
@@ -480,9 +527,13 @@ def calculate_pdf_hash(pdf_file):
     return sha256_hash.hexdigest()
 
 
+
+def example(request):
+    return render(request, 'users/example.html', {'title' : 'About'})
+
 @api_view(['GET'])
 def example_api(request):
-    data = {'message': 'Hello from Django API!!!'}
+    data = reverse('example', kwargs={"pk" : 3})
     return Response(data)
 @api_view(['GET'])
 @custom_auth_required
@@ -614,3 +665,9 @@ def get_shared_with_user(request):
         return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
     except Document_shared.DoesNotExist:
         return Response({'message' : 'You do not have any documents shared with you.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+def generate_url(request, tmeplate_name, attribute):
+    url = reverse(tmeplate_name, kwargs={})
+    print('url:',url)
+    return f'<a href="{url}">Link Text</a>'
