@@ -551,6 +551,7 @@ def calculate_pdf_hash(pdf_file):
     
     return sha256_hash.hexdigest()
 
+@api_view(['GET'])
 @custom_auth_required
 def example(request, pk):
     
@@ -561,16 +562,21 @@ def example(request, pk):
     
     shared_doc = Document_shared.objects.get(id = pk)
     doc = shared_doc.doc_id
-    parties_id = shared_doc.parties_id
+    pid = shared_doc.parties_id
     owner = shared_doc.owner_id
     
-    if parties_id != user.user_id:
+    print("doc id: ", doc.document_id)
+    print("user id: ", user.user_id)
+    print("parties_id: ", pid.user_id)
+    print("owner_id: ", owner.user_id)
+    if pid.user_id != user.user_id:
         return Response('Error')
     
+    print("mesa mesa")
+
+    ser = DocumentSharedSerializer(shared_doc)
     
-    context = {'doc_id': doc, "owner_id": owner , "parties_id":parties_id}
-    
-    return render(request, 'users/example.html', context=context, content_type='application/json')
+    return Response( ser.data , status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def example_api(request):
