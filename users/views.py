@@ -463,10 +463,14 @@ def email_add(request, doc_id):
             doc_shared.save()
             subject = f'An invitation to a Contract from {user.email}'
             # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
-            link_mssg = f'The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link'
+            link = reverse('example', kwargs={"pk" : 3})
+            full_link = settings.BASE_URL + link
+            print("link:", link)
+            link_mssg = f"The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link <a href='{full_link}'>Click Here</a>"
             recipient_list = [party.email]
             print("user.email: " , party.email)
             email = EmailMessage(subject, link_mssg, settings.EMAIL_HOST_USER, recipient_list)
+            email.content_subtype = "html"
             try:
                 email.send() 
                 message += f'Email sent to {party.email}'
@@ -548,7 +552,7 @@ def calculate_pdf_hash(pdf_file):
 
 
 
-def example(request):
+def example(request, pk):
     return render(request, 'users/example.html', {'title' : 'About'})
 
 @api_view(['GET'])

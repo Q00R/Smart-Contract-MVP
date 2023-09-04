@@ -29,6 +29,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+APPEND_SLASH = True
+
+BASE_URL = 'http://localhost:8000'
+
 
 # Application definition
 
