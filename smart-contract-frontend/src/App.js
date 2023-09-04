@@ -23,7 +23,7 @@ function App() {
           }
         />
         <Route path="*" element={<Home />} />
-        <Route path="/review-share-doc:doc_id" element={
+        <Route path="/review-share-doc/:doc_id" element={
           // Check if the user is logged in, and if not, navigate to the login page
           Cookies.get('token') ? <ReviewDocument /> : <Navigate to="/login" />} />
       </Routes>
