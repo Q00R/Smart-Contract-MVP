@@ -387,46 +387,45 @@ def upload_pdf(request):
             pass
         document = Documents(user=user, document_name = pdf_file.name ,document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
         document.save()
-        
                 
-        if 'email_list' in request.data:
-            list_of_gmail = request.data["email_list"] 
-            for email in list_of_gmail:
-                print("email: " , email)
-                try:
-                    party = Users.objects.get(email=email)
-                    if not party.is_activated:
-                        message += f'Email {party.email} is not active, '
-                        continue
-                except Users.DoesNotExist:
-                    return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-                doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
-                try:
-                    exist_ds = Document_shared.objects.filter(doc_id=document, owner_id = user, parties_id = party)
-                    if exist_ds:
-                        message += f'Email {party.email} was already added, '
-                        continue
-                except Document_shared.DoesNotExist:
-                    pass
-                doc_shared.save()
-                subject = f'An invitation to a Contract from {user.email}'
-                # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
-                link = reverse('example', kwargs={"pk" : doc_shared.id})
-                full_link = 'http://localhost:3000' + link
-                print("link:", full_link)
-                link_mssg = f"The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link <a href='{full_link}'>Click Here</a>"
-                recipient_list = [party.email]
-                print("user.email: " , party.email)
-                email = EmailMessage(subject, link_mssg, settings.EMAIL_HOST_USER, recipient_list)
-                email.content_subtype = "html"
-                try:
-                    email.send() 
-                    message += f'Email sent to {party.email}'
-                    # return Response({'message': f'Email sent to {party.email}'}, status=status.HTTP_201_CREATED)
-                except Exception as e:
-                    return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                return Response({'message' : 'emails were not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        # if 'email_list' in request.data:
+        #     list_of_gmail = request.data["email_list"] 
+        #     for email in list_of_gmail:
+        #         print("email: " , email)
+        #         try:
+        #             party = Users.objects.get(email=email)
+        #             if not party.is_activated:
+        #                 message += f'Email {party.email} is not active, '
+        #                 continue
+        #         except Users.DoesNotExist:
+        #             return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        #         doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
+        #         try:
+        #             exist_ds = Document_shared.objects.filter(doc_id=document, owner_id = user, parties_id = party)
+        #             if exist_ds:
+        #                 message += f'Email {party.email} was already added, '
+        #                 continue
+        #         except Document_shared.DoesNotExist:
+        #             pass
+        #         doc_shared.save()
+        #         subject = f'An invitation to a Contract from {user.email}'
+        #         # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
+        #         link = reverse('example', kwargs={"pk" : doc_shared.id})
+        #         full_link = 'http://localhost:3000' + link
+        #         print("link:", full_link)
+        #         link_mssg = f"The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link <a href='{full_link}'>Click Here</a>"
+        #         recipient_list = [party.email]
+        #         print("user.email: " , party.email)
+        #         email = EmailMessage(subject, link_mssg, settings.EMAIL_HOST_USER, recipient_list)
+        #         email.content_subtype = "html"
+        #         try:
+        #             email.send() 
+        #             message += f'Email sent to {party.email}'
+        #             # return Response({'message': f'Email sent to {party.email}'}, status=status.HTTP_201_CREATED)
+        #         except Exception as e:
+        #             return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        #     else:
+        #         return Response({'message' : 'emails were not provided'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'message': 'PDF uploaded and compressed successfully.' + message , "Doc_id":document.document_id}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -437,8 +436,9 @@ def upload_pdf(request):
 def email_add(request, doc_id):
     data = getUser(request)
     user = data.data["user"]
-
     message = ''
+    found = []
+    not_found = []
 
     try:
         document = Documents.objects.get(document_id=doc_id, user=user)
@@ -452,10 +452,13 @@ def email_add(request, doc_id):
             try:
                 party = Users.objects.get(email=email)
                 if not party.is_activated:
-                    message += f'Email {party.email} is not active, '
+                    # message += f'Email {party.email} is not active, '
+                    not_found.append(email)
                     continue
             except Users.DoesNotExist:
-                return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+                    not_found.append(email)
+                    # message += f'User {party.email} does not exist '
+                    continue
             doc_shared = Document_shared(doc_id=document, owner_id = user, parties_id = party)
             try:
                 exist_ds = Document_shared.objects.filter(doc_id=document, owner_id = user, parties_id = party)
@@ -464,6 +467,7 @@ def email_add(request, doc_id):
                     continue
             except Document_shared.DoesNotExist:
                 pass
+            found.append(email)
             doc_shared.save()
             subject = f'An invitation to a Contract from {user.email}'
             # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
@@ -482,10 +486,9 @@ def email_add(request, doc_id):
                 # return Response({'message': f'Email sent to {party.email}'}, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'message' : 'emails added'}, status=status.HTTP_201_CREATED)
+        return Response({'message' : f'emails added {found} and emails not added {not_found}'}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message' : 'emails not added'}, status=status.HTTP_400_BAD_REQUEST)
-
             
         
 
@@ -557,7 +560,7 @@ def calculate_pdf_hash(pdf_file):
 
 @api_view(['GET'])
 @custom_auth_required
-def example(request, pk):
+def review_share_doc(request, pk):
     
     data = getUser(request)
     user = data.data["user"]
