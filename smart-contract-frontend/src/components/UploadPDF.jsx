@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import FileInput from './FileInput';
+import EmailInput from './EmailInput';
 import FormAction from './FormAction';
+import Cookies from 'js-cookie';
+
 
 const UploadPDF = () => {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -19,16 +22,23 @@ const UploadPDF = () => {
 
         try {
             const formData = new FormData();
-            formData.append('pdfFile', selectedFile);
+            formData.append('document_file', selectedFile);
+            console.log(Cookies.get('token'));
+
 
             // Perform the file upload here
             const response = await fetch('http://localhost:8000/api/documents/upload/', {
                 method: 'POST',
+                headers: {
+                    'SID': Cookies.get('token'),
+                },
                 body: formData,
             });
 
-            // Handle the response, e.g., show a success message
-            console.log('File uploaded successfully.');
+            const data = await response.json();
+            console.log(data);
+            window.location.reload();
+
         } catch (error) {
             console.error('Error uploading file:', error);
         }
@@ -36,7 +46,11 @@ const UploadPDF = () => {
 
     return (
         <div>
+
+            <EmailInput />
+
             <FileInput onFileChange={handleFileChange} />
+
             <FormAction handleSubmit={handleSubmit} text="Upload" />
         </div>
     );

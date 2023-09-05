@@ -16,7 +16,7 @@ urlpatterns = [
     path('api/users/reset_password/' ,views.reset_password),
     path('api/documents/upload/' ,views.upload_pdf),
     path('api/documents/upload/<str:doc_id>/' ,views.email_add),
-    path('review-share-doc/<int:pk>/', views.example, name='example'),
+    path('review-share-doc/<int:pk>/', views.example, name='review-share-doc'),
     path('api/example/', views.example_api),
     path('api/documents/<str:pk>/retrieve/' ,views.get_document),
     path('api/documents/<str:pk>/retrieve_details/' ,views.get_document_details),

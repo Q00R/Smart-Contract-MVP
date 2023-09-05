@@ -467,7 +467,8 @@ def email_add(request, doc_id):
             doc_shared.save()
             subject = f'An invitation to a Contract from {user.email}'
             # link = reverse('example', kwargs={"pk" : doc_shared.id, "user_id" : user.id})
-            link = reverse('example', kwargs={"pk" : doc_shared.id})
+            link = reverse('review-share-doc', kwargs={"pk" : doc_shared.id}) 
+            #http://localhost:3000/review-share-doc/3/ -> end result of link to send to this frontend page
             full_link = 'http://localhost:3000' + link
             print("link:", full_link)
             link_mssg = f"The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link <a href='{full_link}'>Click Here</a>"
@@ -554,26 +555,31 @@ def calculate_pdf_hash(pdf_file):
     
     return sha256_hash.hexdigest()
 
+@api_view(['GET'])
 @custom_auth_required
 def example(request, pk):
     
     data = getUser(request)
-    print("data from request:", data)
     user = data.data["user"]
-    print("user from data:", user)
     
     shared_doc = Document_shared.objects.get(id = pk)
-    doc = shared_doc.doc_id
-    parties_id = shared_doc.parties_id
-    owner = shared_doc.owner_id
+    doc_id = shared_doc.doc_id.document_id
+
+    doc = Documents.objects.get(document_id = doc_id)
+    print("doc: " , doc)
     
-    if parties_id != user.user_id:
+    if shared_doc.parties_id.user_id != user.user_id:
         return Response('Error')
-    
-    
-    context = {'doc_id': doc, "owner_id": owner , "parties_id":parties_id}
-    
-    return render(request, 'users/example.html', context=context, content_type='application/json')
+
+    #send both the doc and the shared doc
+    doc_ser = DocumentSerializer(doc)
+    shared_doc_ser = DocumentSharedSerializer(shared_doc)
+    ser = {
+        "doc" : doc_ser.data,
+        "shared_doc" : shared_doc_ser.data
+    } 
+
+    return Response( ser , status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def example_api(request):
