@@ -10,9 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
 from pathlib import Path
+# from users.backends import CustomJWTAuthentication
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +31,28 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES' : (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'DocuSign.jwt.CustomJWTAuthentication'
+    ),
+}
+
+# JWT settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
+    'UPDATE_LAST_LOGIN': True,
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=7),
+    'SLIDING_TOKEN_REFRESH_DELTA': timedelta(days=6),
+    'SLIDING_TOKEN_ALGORITHM': 'HS256',
+    'SLIDING_TOKEN_VERIFYING_KEY': None,  # Use 'SECRET_KEY' from settings by default
+    'SLIDING_TOKEN_LEEWAY': timedelta(seconds=1),
+    'SLIDING_TOKEN_REFRESH_LEEWAY': timedelta(days=0),
+    # "USER_AUTHENTICATION_RULE": "users.backends.CustomJWTAuthentication.custom_user_authentication_rule",
+
+}
 
 # Application definition
 
@@ -42,6 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
+    'DocuSign.jwt',
 ]
 
 AUTH_USER_MODEL = 'users.Users'
@@ -96,7 +122,9 @@ DATABASES = {
     }
 }
 AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'users.backends.EmailBackend',
 ]
 
 
@@ -141,7 +169,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+LOGIN_URL = '/api/users/login/'
 # path = Path('.env')
 # load_dotenv(dotenv_path=path)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
