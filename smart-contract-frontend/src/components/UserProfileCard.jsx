@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import OTPVerificationModal from './OTPVerificationModal';
 
 const UserprofileCard = () => {
-    const [isActivated, setIsActivated] = useState(true); // Initialize the state
+    const [isActivated, setIsActivated] = useState(localStorage.getItem('user').isActivated); // Initialize the state
 
     const isActivatedClassName = 'mr-5 mt-12 w-auto btn-sm btn btn-outline btn-success';
     const isActivatedText = 'Activate';
