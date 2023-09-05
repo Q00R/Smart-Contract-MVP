@@ -11,6 +11,7 @@ const EmailInput = ({ emailList, setEmailList }) => {
 
         // You can also update the email list state here if needed,
         // but it won't add emails immediately on input change.
+        console.log(emailList);
     };
 
     const addEmail = () => {
@@ -24,12 +25,14 @@ const EmailInput = ({ emailList, setEmailList }) => {
         }));
 
         setNewEmail('');
+
+        console.log(emailList);
     };
 
     const handleRemoveEmail = (index) => {
         // Create a copy of the email list and remove the email at the specified index
         const updatedEmailList = [...emailList.email];
-        updatedEmailList.splice(index, 1);
+        updatedEmailList.splice(index, 0);
 
         // Update the email list state
         setEmailList((prev) => ({

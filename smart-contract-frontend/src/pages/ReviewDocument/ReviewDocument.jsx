@@ -28,7 +28,7 @@ const ReviewDocument = () => {
                 console.log('data', data);
                 console.log('Success:', data);
                 setDocumentID(data['doc_id']);
-                setDocumentTitle(data['doc']['document_name']);
+                setDocumentTitle(data['doc']);
             } catch (error) {
                 console.error('Error:', error);
             }

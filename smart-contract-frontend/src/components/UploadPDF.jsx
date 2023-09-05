@@ -25,8 +25,6 @@ const UploadPDF = () => {
         try {
             const formData = new FormData();
             formData.append('document_file', selectedFile);
-            console.log(Cookies.get('token'));
-
 
             // Perform the file upload here
             const response = await fetch('http://localhost:8000/api/documents/upload/', {
@@ -34,31 +32,35 @@ const UploadPDF = () => {
                 headers: {
                     'SID': Cookies.get('token'),
                 },
-                body: formData,
+                body: formData, // Use the FormData object
             });
 
             const data = await response.json();
             console.log(data);
 
-            handleAddEmails()
-
-            window.location.reload();
+            await handleAddEmails(data['Doc_id']);
 
         } catch (error) {
             console.error('Error uploading file:', error);
         }
     };
 
-    const handleAddEmails = async () => {
 
+
+    const handleAddEmails = async (doc_id) => {
+
+        console.log('doc_id', doc_id);
+        console.log('emailList', emailList.email);
+
+        console.log('emailList tany', JSON.stringify(emailList.email));
         try {
-            const response = await fetch('http://localhost:8000/api/documents/upload/<str:doc_id>/', {
+            const response = await fetch(`http://localhost:8000/api/documents/EmailAdd/${doc_id}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'SID': Cookies.get('token'),
                 },
-                body: JSON.stringify(emailList),
+                body: JSON.stringify({ email_list: emailList.email }), // Correct the JSON structure here
             });
 
             const data = await response.json();
@@ -67,7 +69,6 @@ const UploadPDF = () => {
         } catch (error) {
             console.error('Error adding emails:', error);
         }
-
     };
 
 
