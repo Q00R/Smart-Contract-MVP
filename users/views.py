@@ -137,7 +137,6 @@ def verify_otp(request):
     user.is_activated = True
     user.save()
     saved_otp.delete()
-    
     return Response({'message': 'Email is Activated'})
 
 # deactivate account

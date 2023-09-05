@@ -36,6 +36,17 @@ const UploadPDF = () => {
             });
 
             const data = await response.json();
+
+            //handle if user is not activated
+            if (data['message'] === 'User is not activated') {
+                console.log('User is not activated');
+
+                //show some error message fel frontend
+
+
+                return;
+            }
+
             console.log(data);
 
             await handleAddEmails(data['Doc_id']);

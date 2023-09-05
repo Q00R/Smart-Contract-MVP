@@ -3,6 +3,7 @@ import { signupFields } from "../constants/formFields"
 import FormAction from "./FormAction";
 import Input from "./Input";
 import OTPVerificationModal from './OTPVerificationModal';
+import Cookies from 'js-cookie';
 
 
 const fields = signupFields;
@@ -17,7 +18,7 @@ export default function Signup() {
 
 
     //set the initial state of the modal
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(localStorage.getItem('modalIsOpen') === 'true' ? true : false);
 
     //handle input change
     const handleChange = (e) => setSignupState({ ...signupState, [e.target.id]: e.target.value });
@@ -78,14 +79,60 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-
-                //redirect to login page
-                window.location.href = '/login'
+                login();
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
     }
+
+    const login = async () => {
+        //login the user and redirect to the dashboard
+        await fetch('http://localhost:8000/api/users/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "email": signupState['email-address'], "password": signupState['password'] }) //convert the data to a JSON string
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                Cookies.set('token', data.token['token'], { expires: 1 / 24 });
+                sendOTP();
+            }
+            )
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+    const sendOTP = async () => {
+        try {
+            console.log("Sending OTP");
+
+            console.log(Cookies.get('token'));
+
+            const response = await fetch('http://localhost:8000/api/users/activate/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                },
+            });
+
+            const data = await response.json();
+            console.log(JSON.stringify(data));
+            console.log(data);
+
+            // Show OTP verification modal
+            setIsModalOpen(true);
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
     return (
 
@@ -108,9 +155,8 @@ export default function Signup() {
 
                     )
                 }
-                <FormAction handleSubmit={handleSubmit} text="Signup" />
-
-                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} />
+                <FormAction handleSubmit={handleSubmit} text="Sign up" />
+                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} userEmail={signupState['email-address']} />
             </div>
         </form>
     )
