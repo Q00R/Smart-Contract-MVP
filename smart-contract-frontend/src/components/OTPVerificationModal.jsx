@@ -51,6 +51,11 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
             if (data['message'] === 'Email is Activated') {
                 setVerificationStatus('OTP verified successfully');
 
+                //save the updated user info in local storage
+                const user = JSON.parse(localStorage.getItem('user'));
+                user.isActivated = true;
+                localStorage.setItem('user', JSON.stringify(user));
+
                 //close the modal
                 onRequestClose();
 
