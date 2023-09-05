@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import OTPVerificationModal from './OTPVerificationModal';
+import EditAccountModal from './EditAccountModal';
+import ResetPasswordModal from './ResetPasswordModal';
 
-const UserprofileCard = () => {
+const UserprofileCard = ({ isOpen, onRequestClose }) => {
     const [isActivated, setIsActivated] = useState(localStorage.getItem('user').isActivated); // Initialize the state
 
     const isActivatedClassName = 'mr-5 mt-12 w-auto btn-sm btn btn-outline btn-success';
@@ -10,10 +12,28 @@ const UserprofileCard = () => {
     const isDeactivatedClassName = 'mr-5 mt-12 w-auto btn-sm btn btn-outline btn-error';
     const isDeactivatedText = 'Deactivate';
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isVerifyModalOpen, setisVerifyModalOpen] = useState(false);
+    const [isEditAccountModalOpen, setisEditAccountModalOpen] = useState(false);
+    const [isResetPasswordModalOpen, setisResetPasswordModalOpen] = useState(false);
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
+    const handleCloseVerifyModal = () => {
+        setisVerifyModalOpen(false);
+    };
+
+    const handleCloseResetPasswordModal = () => {
+        setisResetPasswordModalOpen(false);
+    };
+
+    const handleOpenResetPasswordModal = () => {
+        setisResetPasswordModalOpen(true);
+    };
+
+    const handleCloseEditAccountModal = () => {
+        setisEditAccountModalOpen(false);
+    };
+
+    const handleOpenEditAccountModal = () => {
+        setisEditAccountModalOpen(true);
     };
 
     const handleDeactivate = async () => {
@@ -73,7 +93,7 @@ const UserprofileCard = () => {
 
 
             // Show OTP verification modal
-            setIsModalOpen(true);
+            setisVerifyModalOpen(true);
 
         } catch (error) {
             console.error('Error:', error);
@@ -90,6 +110,9 @@ const UserprofileCard = () => {
     return (
         <div className="flex flex-col items-center justify-center">
             <div className="bg-base-200 shadow-xl rounded-lg py-3">
+                <button onClick={onRequestClose} className="ml-3 btn btn-accent btn-sm">
+                    back
+                </button>
                 <h3 className="text-center text-2xl text-base-content font-medium leading-8">
                     {user.firstname + " " + user.lastname}
                 </h3>
@@ -109,10 +132,10 @@ const UserprofileCard = () => {
                         </tr>
                         <tr>
                             <td>
-                                <button className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-info'>Edit Account</button>
+                                <button onClick={handleOpenEditAccountModal} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-info'>Edit Account</button>
                             </td>
                             <td>
-                                <button className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-warning'>Reset Password</button>
+                                <button onClick={handleOpenResetPasswordModal} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-warning'>Reset Password</button>
                             </td>
                         </tr>
                         <tr>
@@ -128,7 +151,9 @@ const UserprofileCard = () => {
                         </tr>
                     </tbody>
                 </table>
-                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} userEmail={user.email} />
+                <OTPVerificationModal isOpen={isVerifyModalOpen} onRequestClose={handleCloseVerifyModal} userEmail={user.email} />
+                <EditAccountModal isOpen={isEditAccountModalOpen} onRequestClose={handleCloseEditAccountModal} />
+                <ResetPasswordModal isOpen={isResetPasswordModalOpen} onRequestClose={handleCloseResetPasswordModal} />
             </div>
         </div>
     );
