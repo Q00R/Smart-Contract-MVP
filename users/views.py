@@ -427,7 +427,7 @@ def upload_pdf(request):
                     return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 return Response({'message' : 'emails were not provided'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'message': 'PDF uploaded and compressed successfully.' + message}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'PDF uploaded and compressed successfully.' + message , "Doc_id":document.document_id}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -561,12 +561,18 @@ def example(request, pk):
     
     data = getUser(request)
     user = data.data["user"]
-    
-    shared_doc = Document_shared.objects.get(id = pk)
-    doc_id = shared_doc.doc_id.document_id
+    try:
+        shared_doc = Document_shared.objects.get(id = pk)
+        doc_id = shared_doc.doc_id.document_id
+    except Document_shared.DoesNotExist:
+        return Response({'message': 'Document shared not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    doc = Documents.objects.get(document_id = doc_id)
-    print("doc: " , doc)
+    try:
+        doc = Documents.objects.get(document_id = doc_id)
+    #print("doc: " , doc)
+    except Documents.DoesNotExist:
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+
     
     if shared_doc.parties_id.user_id != user.user_id:
         return Response('Error')
