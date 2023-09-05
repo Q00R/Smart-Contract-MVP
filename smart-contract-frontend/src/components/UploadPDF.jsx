@@ -7,6 +7,8 @@ import Cookies from 'js-cookie';
 
 const UploadPDF = () => {
     const [selectedFile, setSelectedFile] = useState(null);
+    const [emailList, setEmailList] = useState({ email: [] });
+
 
     const handleFileChange = (file) => {
         setSelectedFile(file);
@@ -37,6 +39,9 @@ const UploadPDF = () => {
 
             const data = await response.json();
             console.log(data);
+
+            handleAddEmails()
+
             window.location.reload();
 
         } catch (error) {
@@ -44,10 +49,32 @@ const UploadPDF = () => {
         }
     };
 
+    const handleAddEmails = async () => {
+
+        try {
+            const response = await fetch('http://localhost:8000/api/documents/upload/<str:doc_id>/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'SID': Cookies.get('token'),
+                },
+                body: JSON.stringify(emailList),
+            });
+
+            const data = await response.json();
+            console.log(data);
+
+        } catch (error) {
+            console.error('Error adding emails:', error);
+        }
+
+    };
+
+
     return (
         <div>
 
-            <EmailInput />
+            <EmailInput emailList={emailList} setEmailList={setEmailList} />
 
             <FileInput onFileChange={handleFileChange} />
 

@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import Input from './Input';
 import Chips from './Chips';
 
-const EmailInput = () => {
-    const [emailList, setEmailList] = useState({
-        email: [],
-    });
+const EmailInput = ({ emailList, setEmailList }) => {
     const [newEmail, setNewEmail] = useState('');
 
     const handleChange = (e) => {
@@ -14,8 +11,6 @@ const EmailInput = () => {
 
         // You can also update the email list state here if needed,
         // but it won't add emails immediately on input change.
-
-        console.log(emailList);
     };
 
     const addEmail = () => {
@@ -29,8 +24,6 @@ const EmailInput = () => {
         }));
 
         setNewEmail('');
-
-        console.log(emailList);
     };
 
     const handleRemoveEmail = (index) => {
@@ -43,8 +36,6 @@ const EmailInput = () => {
             ...prev,
             email: updatedEmailList,
         }));
-
-        console.log(emailList);
     };
 
     return (
