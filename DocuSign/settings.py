@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES' : (
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'DocuSign.authentication.CustomJWTAuthentication'
     ),
 }
@@ -51,7 +51,8 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LEEWAY': timedelta(seconds=1),
     'SLIDING_TOKEN_REFRESH_LEEWAY': timedelta(days=0),
     'USER_AUTHENTICATION_RULE' : 'DocuSign.authentication.custom_user_authentication_rule',
-    "UPDATE_LAST_LOGIN": True,
+    'UPDATE_LAST_LOGIN': True,
+    'OKEN_OBTAIN_SERIALIZER': 'users.serializers.MyTokenObtainPairSerializer',
 }
 
 # Application definition

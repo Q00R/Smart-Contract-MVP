@@ -13,7 +13,7 @@ from rest_framework import status
 
 
 from .models import Users , Documents ,Document_shared, OneTimePassword 
-from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer  
+from .serializers import DocumentSerializer ,DocumentSharedSerializer ,UserSerializer, MyTokenObtainPairSerializer
 
 import secrets
 import hashlib
@@ -38,6 +38,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from DocuSign.authentication import CustomJWTAuthentication
+from rest_framework_simplejwt.tokens import AccessToken
 # from rest_framework_jwt.views import obtain_jwt_token
 
 
@@ -51,6 +52,7 @@ from DocuSign.authentication import CustomJWTAuthentication
 
 
 @api_view(['POST'])
+# @permission_classes([AllowAny])
 def register(request):
     try:
 		
@@ -69,65 +71,11 @@ def register(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # send mail with activation
-# @login_required
-# @api_view(['GET'])    
-# def activate(request):
-    
-#     session_key = request.COOKIES.get('sessionid')
-#     session = Session.objects.filter(session_key=session_key, expire_date__gte=timezone.now()).first()
-
-#     if session is None:
-#         return Response({'error': 'Invalid session'}, status=status.HTTP_401_UNAUTHORIZED)
-
-#     user_id = session.get_decoded().get('_auth_user_id')
-
-#     try:
-#         user = Users.objects.get(pk=user_id)
-#     except Users.DoesNotExist:
-#         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-#     if user.is_active:
-#         return Response({'Message': 'User already activated'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
-#     try:
-#         otpfound = OneTimePassword.objects.get(user_id = user.user_id)
-#         otpfound.delete()
-#     except OneTimePassword.DoesNotExist:
-#         pass  # No OTP found, nothing to delete
-    
-#     if not user.email:
-#         return Response({'error': 'Email not found'}, status=status.HTTP_400_BAD_REQUEST)
-    
-#     otp = OneTimePassword.objects.create(user_id = user)
-#     otp.generate_OTP()
-#     otp.save()
-    
-    
-#     subject = 'Your OTP for Email Verification'
-#     message = f'Your OTP is: {otp.otp}'
-#     recipient_list = [user.email]
-#     print("user.email: " , user.email)
-#     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
-#     print("Sending email: " , settings.EMAIL_HOST_USER)
-#     print("Sending email pass: " , settings.EMAIL_HOST_PASSWORD)
-
-
-
-#     try:
-#         email.send() 
-#         return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
-#     except Exception as e:
-#         return Response({'error': f'Failed to send email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 @api_view(['POST'])
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated])
 def activate(request):
     user = request.user
-
-    # Rest of your activation logic
-    # ...
 
     if user.is_active:
         return Response({'Message': 'User already activated'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -202,11 +150,7 @@ def verify_otp(request):
 @authentication_classes([IsAuthenticated])
 def deactivate(request):
     
-    user = request.user
-    
-    if not user.is_active:
-        return Response("User is already deactivated", status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+    user = request.user    
     Users.objects.filter(pk=user.id).update(is_active=False)
 
     return Response({'message': 'Account is deacivated'})
@@ -318,10 +262,10 @@ def log_in(request):
     email = request.data.get('email')
     password = request.data.get('password')
     user = authenticate(request=request, email=email, password=password)
-    print("user:", user)
     if user is not None:
         refresh = RefreshToken.for_user(user)
         return Response({ 
+        'message' : 'Login Successful',
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     }, status=status.HTTP_200_OK)
