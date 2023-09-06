@@ -504,9 +504,15 @@ def get_document(request, pk):
     user = data.data["user"]
     print("user: " , user)
     try:
-        print("d5lt el try")
-        print("pk: " , pk)
         document = Documents.objects.get(document_id=pk)
+        
+        if document.user != user:
+            try:
+                doc_shared = Document_shared.objects.get(doc_id= document , parties_id = user)
+            except Document_shared.DoesNotExist:
+                return Response({'message': 'NOT ALLOWED TO DOWNLOAD'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
         print("document: " , document)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
