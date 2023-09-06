@@ -54,45 +54,13 @@ export default function Login() {
 
             //set cookie expiration to 1 hour
             Cookies.set('token', data.token['token'], { expires: 1 / 24 });
-
-            if (!data.is_activated) {
-                console.log("user is not active");
-                await sendOTP();
-            } else {
-                console.log("user is active");
-                window.location.href = "/dashboard";
-            }
+            window.location.href = "/dashboard";
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
-    const sendOTP = async () => {
-        try {
-            console.log("Sending OTP");
 
-            console.log(Cookies.get('token'));
-
-            const response = await fetch('http://localhost:8000/api/users/activate/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
-                },
-            });
-
-            const data = await response.json();
-            console.log(JSON.stringify(data));
-            console.log(data);
-
-            // Show OTP verification modal
-            setIsModalOpen(true);
-
-
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
 
     return (
         <form className="flex flex-col mt-8 space-y-6 p-12 m-10">

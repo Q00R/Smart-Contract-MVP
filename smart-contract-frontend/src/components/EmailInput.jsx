@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import Input from './Input';
 import Chips from './Chips';
 
-const EmailInput = () => {
-    const [emailList, setEmailList] = useState({
-        email: [],
-    });
+const EmailInput = ({ emailList, setEmailList }) => {
     const [newEmail, setNewEmail] = useState('');
 
     const handleChange = (e) => {
@@ -14,7 +11,6 @@ const EmailInput = () => {
 
         // You can also update the email list state here if needed,
         // but it won't add emails immediately on input change.
-
         console.log(emailList);
     };
 
@@ -43,27 +39,29 @@ const EmailInput = () => {
             ...prev,
             email: updatedEmailList,
         }));
-
-        console.log(emailList);
     };
 
     return (
         <div>
             <Chips emailList={emailList.email} onRemoveEmail={handleRemoveEmail} />
-            <Input
-                key={"email"}
-                handleChange={handleChange}
-                value={newEmail}
-                labelText={"Email Address"}
-                labelFor={"email-address"}
-                id={"email"}
-                name={"email"}
-                type={"email"}
-                isRequired={false}
-                placeholder={"Enter email address to share the document with"}
-            />
-            <div className="flex justify-center">
-                <button onClick={addEmail} className="my-3 self-center btn btn-primary">
+            <div className='flex flex-row my-3'>
+
+                <div className='flex-grow'>
+                    <Input
+                        key={"email"}
+                        handleChange={handleChange}
+                        value={newEmail}
+                        labelText={"Email Address"}
+                        labelFor={"email-address"}
+                        id={"email"}
+                        name={"email"}
+                        type={"email"}
+                        isRequired={false}
+                        placeholder={"Enter email address to share the document with"}
+                        className={"max-w-full"}
+                    />
+                </div>
+                <button onClick={addEmail} className="mx-3 my-3 self-center btn btn-primary">
                     Add
                 </button>
             </div>

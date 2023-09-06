@@ -11,7 +11,7 @@ const UserProfileModal = ({ isOpen, onRequestClose }) => {
             <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-100 py-12">
                 <div class="relative px-6 pt-10 pb-9 shadow-xl mx-auto rounded-2xl">
                     <div class="flex flex-col space-y-16">
-                        <UserProfileCard />
+                        <UserProfileCard isOpen={isOpen} onRequestClose={onRequestClose} />
                     </div>
                 </div>
             </div>
