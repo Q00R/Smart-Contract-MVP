@@ -444,6 +444,10 @@ def email_add(request, doc_id):
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+    if document.is_completed:
+        return Response({'ERROR': 'Document is uploaded on BC, you cannot add another user.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    
     if 'email_list' in request.data:
         list_of_gmail = request.data["email_list"] 
         for email in list_of_gmail:
@@ -742,6 +746,14 @@ def delete_email(request , doc_id, party_id):
         party = Users.objects.get(user_id=party_id)
     except Users.DoesNotExist:
         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        doc = Documents.objects.get(pk=doc_id)
+    except Documents.DoesNotExist:
+        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if doc.is_completed:
+        return Response({'ERROR': 'Document is uploaded on BC.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     try:
         doc_shared = Document_shared.objects.get(doc_id = doc_id, owner_id=user, parties_id=party)
