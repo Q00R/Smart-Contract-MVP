@@ -502,8 +502,12 @@ def get_document(request, pk):
     
     data = getUser(request)
     user = data.data["user"]
+    print("user: " , user)
     try:
-        document = Documents.objects.get(document_id=pk, user=user)
+        print("d5lt el try")
+        print("pk: " , pk)
+        document = Documents.objects.get(document_id=pk)
+        print("document: " , document)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -587,6 +591,7 @@ def review_share_doc(request, pk):
     doc_ser = DocumentSerializer(doc)
     shared_doc_ser = DocumentSharedSerializer(shared_doc)
     ser = {
+        "sender_email": shared_doc.owner_id.email,
         "doc" : doc_ser.data,
         "shared_doc" : shared_doc_ser.data
     } 
