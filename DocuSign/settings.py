@@ -33,8 +33,8 @@ ALLOWED_HOSTS = []
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES' : (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'DocuSign.jwt.CustomJWTAuthentication'
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'DocuSign.authentication.CustomJWTAuthentication'
     ),
 }
 
@@ -50,8 +50,8 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_VERIFYING_KEY': None,  # Use 'SECRET_KEY' from settings by default
     'SLIDING_TOKEN_LEEWAY': timedelta(seconds=1),
     'SLIDING_TOKEN_REFRESH_LEEWAY': timedelta(days=0),
-    # "USER_AUTHENTICATION_RULE": "users.backends.CustomJWTAuthentication.custom_user_authentication_rule",
-
+    'USER_AUTHENTICATION_RULE' : 'DocuSign.authentication.custom_user_authentication_rule',
+    "UPDATE_LAST_LOGIN": True,
 }
 
 # Application definition
@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
-    'DocuSign.jwt',
+    'DocuSign.authentication',
 ]
 
 AUTH_USER_MODEL = 'users.Users'
