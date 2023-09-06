@@ -89,10 +89,9 @@ def activate(request):
     subject = 'Your OTP for Email Verification'
     message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
-    # print("user.email: " , user.email)
     email = EmailMessage(subject, message, from_email= settings.EMAIL_HOST_USER, to=recipient_list)
-    # print("Sending email: " , settings.EMAIL_HOST_USER)
-    # print("Sending email pass: " , settings.EMAIL_HOST_PASSWORD)
+
+
 
 
 
@@ -200,7 +199,6 @@ def email_pass_reset(request):
     subject = 'Your OTP for Password reset'
     message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
-    print("user.email: " , user.email)
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
     try:
@@ -287,25 +285,13 @@ def login(request):
     if hashed_password == user.password:
         userser = UserSerializer(user)
 
-        print('abl el try')
-
         try:
 
-            #print("d5lt el try")
-            
-            #print(user)
-            
-            #print("cookie: " , request.COOKIES.get('token'))
-
             exist_token = Session.objects.get(user_id=user)
-
-            #print("exist_token: " , exist_token)
             
             if exist_token.is_expired():
                 exist_token.delete()
-                print("expired token deleted")
             else:
-                print("da5lt el else")
                 sertoken = SessionSerializer(exist_token)
                 response = Response({'message' : 'token already exists and redirect to home page' , "token": sertoken.data , "user":userser.data, "is_activated": user.is_activated})
                 #response.set_cookie("token", exist_token.token)
@@ -313,24 +299,19 @@ def login(request):
         except Session.DoesNotExist:
             pass
         except Session.MultipleObjectsReturned:
-            print("da5lt el except")
             tokens = Session.objects.filter(user_id=user)
             tokens.delete()
 
-        print("5alst el except")
         token  = Session.objects.create(user_id=user)
         token.generate_token()
         token.save()
-        print("final token: " , token.token)
         tokenser = SessionSerializer(token)
         headers = {
         "Authorization":  token.token 
         }
         
-        print("header: " , headers )
         response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated}  )#headers = headers
         #response.set_cookie('token', token.token) #expires=token.expires_at        
-        print(" set cookies el fel 2wel login:  ", token.token)
         response["header"] = token.token
         
         return response
@@ -377,7 +358,6 @@ def upload_pdf(request):
         zip = compress_pdf_to_zip(pdf_content, pdf_file.name)
         # Create a ContentFile from the compressed content
         compressed_pdf = ContentFile(zip, name=f'{pdf_file.name}.zip')
-        print("pdf_file.name: " , pdf_file.name)
         try:
             existdoc= Documents.objects.filter(user=user, document_hash=pdf_hash)
             if existdoc:
@@ -451,7 +431,6 @@ def email_add(request, doc_id):
     if 'email_list' in request.data:
         list_of_gmail = request.data["email_list"] 
         for email in list_of_gmail:
-            print("email: " , email)
             try:
                 party = Users.objects.get(email=email)
                 if not party.is_activated:
@@ -477,10 +456,8 @@ def email_add(request, doc_id):
             link = reverse('review-share-doc', kwargs={"pk" : doc_shared.id}) 
             #http://localhost:3000/review-share-doc/3/ -> end result of link to send to this frontend page
             full_link = 'http://localhost:3000' + link
-            print("link:", full_link)
             link_mssg = f"The user {user.firstname} {user.lastname} has offered you a contract in which you can review and accept or reject in the below link <a href='{full_link}'>Click Here</a>"
             recipient_list = [party.email]
-            print("user.email: " , party.email)
             email = EmailMessage(subject, link_mssg, settings.EMAIL_HOST_USER, recipient_list)
             email.content_subtype = "html"
             try:
@@ -502,7 +479,6 @@ def get_document(request, pk):
     
     data = getUser(request)
     user = data.data["user"]
-    print("user: " , user)
     try:
         document = Documents.objects.get(document_id=pk)
         
@@ -513,7 +489,6 @@ def get_document(request, pk):
                 return Response({'message': 'NOT ALLOWED TO DOWNLOAD'}, status=status.HTTP_401_UNAUTHORIZED)
 
         
-        print("document: " , document)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -585,7 +560,6 @@ def review_share_doc(request, pk):
 
     try:
         doc = Documents.objects.get(document_id = doc_id)
-    #print("doc: " , doc)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -665,9 +639,7 @@ def confirm_document(request, doc_id):
 def getUser(request):
     sessionToken = get_session_token(request)
     #ser = SessionSerializer(sessionToken)
-    #print("sessionToken: " , sessionToken.token)
     try:
-        print("d5lt el try")
         session = Session.objects.get(token=sessionToken.data)
         user = Users.objects.get(user_id=session.user_id_id)
         
@@ -742,7 +714,6 @@ def get_shared_with_user(request):
 
 def generate_url(request, tmeplate_name, attribute):
     url = reverse(tmeplate_name, kwargs={})
-    print('url:',url)
     return f'<a href="{url}">Link Text</a>'
 
 
