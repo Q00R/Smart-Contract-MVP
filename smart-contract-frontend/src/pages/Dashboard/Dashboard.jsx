@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import documentsImage from '../../Assets/documentsImage.png'
 import uploadImage from '../../Assets/UploadImage.png'
 import sharedDocumentsImage from '../../Assets/sharedDocumentIWithMeIcon.png'
+import DownloadButton from '../../components/DownloadButton';
 
 
 const Dashboard = () => {
@@ -61,7 +62,7 @@ const Dashboard = () => {
                     colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
-                    actionButton={<button className="btn btn-sm btn-outline btn-ghost">Download</button>}
+                    actionButton={<DownloadButton />}
 
                 />
             </div>
