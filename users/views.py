@@ -729,3 +729,24 @@ def generate_url(request, tmeplate_name, attribute):
     url = reverse(tmeplate_name, kwargs={})
     print('url:',url)
     return f'<a href="{url}">Link Text</a>'
+
+
+
+@api_view(['PUT'])
+@custom_auth_required
+def delete_email(request , doc_id, party_id):
+    data = getUser(request)
+    user = data.data["user"]
+    
+    try:
+        party = Users.objects.get(user_id=party_id)
+    except Users.DoesNotExist:
+        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    
+    try:
+        doc_shared = Document_shared.objects.get(doc_id = doc_id, owner_id=user, parties_id=party)
+        doc_shared.delete()
+        return Response({'message' : f'Deleted {party_id.email} from contract'}, status=status.HTTP_200_OK)
+    except Document_shared.DoesNotExist:
+        return Response({'message' : f'Could not find a shared record {doc_shared} with {party}'}, status=status.HTTP_404_NOT_FOUND)
