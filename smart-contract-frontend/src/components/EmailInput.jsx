@@ -32,7 +32,7 @@ const EmailInput = ({ emailList, setEmailList }) => {
     const handleRemoveEmail = (index) => {
         // Create a copy of the email list and remove the email at the specified index
         const updatedEmailList = [...emailList.email];
-        updatedEmailList.splice(index, 0);
+        updatedEmailList.splice(index, 1);
 
         // Update the email list state
         setEmailList((prev) => ({
@@ -44,20 +44,24 @@ const EmailInput = ({ emailList, setEmailList }) => {
     return (
         <div>
             <Chips emailList={emailList.email} onRemoveEmail={handleRemoveEmail} />
-            <Input
-                key={"email"}
-                handleChange={handleChange}
-                value={newEmail}
-                labelText={"Email Address"}
-                labelFor={"email-address"}
-                id={"email"}
-                name={"email"}
-                type={"email"}
-                isRequired={false}
-                placeholder={"Enter email address to share the document with"}
-            />
-            <div className="flex justify-center">
-                <button onClick={addEmail} className="my-3 self-center btn btn-primary">
+            <div className='flex flex-row my-3'>
+
+                <div className='flex-grow'>
+                    <Input
+                        key={"email"}
+                        handleChange={handleChange}
+                        value={newEmail}
+                        labelText={"Email Address"}
+                        labelFor={"email-address"}
+                        id={"email"}
+                        name={"email"}
+                        type={"email"}
+                        isRequired={false}
+                        placeholder={"Enter email address to share the document with"}
+                        className={"max-w-full"}
+                    />
+                </div>
+                <button onClick={addEmail} className="mx-3 my-3 self-center btn btn-primary">
                     Add
                 </button>
             </div>

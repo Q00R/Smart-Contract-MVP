@@ -45,14 +45,35 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
             });
 
             const data = await response.json();
-            console.log(data);
+            console.log("men gowa handle verify", data);
 
-            if (data.success) {
-                setVerificationStatus('OTP verified successfully!');
-                // Proceed with token-based authentication or other actions
+            //wait for data to be returned
+            if (data['message'] === 'Email is Activated') {
+                setVerificationStatus('OTP verified successfully');
+
+                //save the updated user info in local storage
+                const user = JSON.parse(localStorage.getItem('user'));
+                user.isActivated = true;
+                localStorage.setItem('user', JSON.stringify(user));
+
+                //close the modal
+                onRequestClose();
+
                 window.location.href = "/dashboard";
             } else {
-                setVerificationStatus('Invalid OTP. Please try again.');
+                //keep the modal open and show the error message
+                setVerificationStatus('OTP verification failed');
+                localStorage.setItem('modalIsOpen', true);
+
+                //reset the input fields
+                document.getElementById('Digit_1').value = "";
+                document.getElementById('Digit_2').value = "";
+                document.getElementById('Digit_3').value = "";
+                document.getElementById('Digit_4').value = "";
+
+                //set focus on the first input field
+                document.getElementById('Digit_1').focus();
+
             }
         } catch (error) {
             console.error('Error verifying OTP', error);
@@ -72,16 +93,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                     "SID": Cookies.get('token'), // Include the token in the custom "SID" header
                 },
             });
-
             const data = await response.json();
-            console.log(JSON.stringify(data));
-            console.log(data);
-
-            // window.location.href = "/login";
-            // Show OTP verification modal
-            // setIsModalOpen(true);
-
-
         } catch (error) {
             console.error('Error:', error);
         }
@@ -90,26 +102,26 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
 
     return (
         <Modal className={'overflow-hidden'} isOpen={isOpen} onRequestClose={onRequestClose}>
-            <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-100 py-12">
-                <div class="relative px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
-                    <div class="mx-auto flex w-full max-w-md flex-col space-y-16">
-                        <div class="flex flex-col items-center justify-center text-center space-y-2">
-                            <div class="font-semibold text-3xl">
+            <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-100 py-12">
+                <div className="relative px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
+                    <div className="mx-auto flex w-full max-w-md flex-col space-y-16">
+                        <div className="flex flex-col items-center justify-center text-center space-y-2">
+                            <div className="font-semibold text-3xl">
                                 <p>Email Verification</p>
                             </div>
-                            <div class="flex flex-row text-sm font-medium text-base-content">
+                            <div className="flex flex-row text-sm font-medium text-base-content">
                                 <p>We have sent a code to your email {userEmail}</p>
                             </div>
                         </div>
 
                         <div>
-                            <form action="" method="post">
-                                <div class="flex flex-col space-y-16">
-                                    <div class="flex flex-row items-center justify-between mx-auto w-full max-w-xs">
+                            <form>
+                                <div className="flex flex-col space-y-16">
+                                    <div className="flex flex-row items-center justify-between mx-auto w-full max-w-xs">
 
-                                        <div class="w-16 h-16 ">
+                                        <div className="w-16 h-16 ">
                                             <input
-                                                class="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
+                                                className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
                                                 type="text"
                                                 name=""
                                                 id="Digit_1"
@@ -117,9 +129,9 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                                 onInput={(event) => handleDigitChange(event, 'Digit_2')}
                                             />
                                         </div>
-                                        <div class="w-16 h-16 ">
+                                        <div className="w-16 h-16 ">
                                             <input
-                                                class="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
+                                                className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
                                                 type="text"
                                                 name=""
                                                 id="Digit_2"
@@ -127,9 +139,9 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                                 onInput={(event) => handleDigitChange(event, 'Digit_3')}
                                             />
                                         </div>
-                                        <div class="w-16 h-16 ">
+                                        <div className="w-16 h-16 ">
                                             <input
-                                                class="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
+                                                className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
                                                 type="text"
                                                 name=""
                                                 id="Digit_3"
@@ -137,9 +149,9 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                                 onInput={(event) => handleDigitChange(event, 'Digit_4')}
                                             />
                                         </div>
-                                        <div class="w-16 h-16 ">
+                                        <div className="w-16 h-16 ">
                                             <input
-                                                class="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
+                                                className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
                                                 type="text"
                                                 name=""
                                                 id="Digit_4"
@@ -148,17 +160,10 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                             />
                                         </div>
                                     </div>
-
-                                    <div class="flex flex-col space-y-5">
-                                        {/* TODO redirects for some reason */}
-                                        <button onClick={() => handleVerify()} class="btn btn-primary btn-md">
-                                            Verify Account
-                                        </button>
-                                        <button className='btn btn-outline btn-md' onClick={onRequestClose}>Close</button>
+                                    <div className="flex flex-col space-y-5">
                                         <p className='self-center'>{verificationStatus}</p>
-                                        <div class="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-base-content">
-                                            {/* TODO also redirects */}
-                                            <p>Didn't recieve code?</p> <button class="flex flex-row items-center text-primary" onClick={sendOTP}>Resend</button>
+                                        <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-base-content">
+                                            <p>Didn't recieve code?</p> <button className="flex flex-row items-center text-primary" onClick={sendOTP}>Resend</button>
                                         </div>
                                     </div>
                                 </div>

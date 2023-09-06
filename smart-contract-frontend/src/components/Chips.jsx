@@ -4,7 +4,7 @@ const Chips = ({ emailList, onRemoveEmail }) => {
     return (
         <div>
             {emailList.map((email, index) => (
-                <span key={index} className="inline-flex items-center px-2 py-1 mr-2 mb-3 text-sm font-medium bg-primary text-neutral-focus rounded">
+                <span key={index} className="inline-flex items-center px-2 py-1 mr-2 mb-3 text-sm font-medium bg-primary text-neutral-focus rounded-2xl">
                     {email}
                     <button
                         type="button"
