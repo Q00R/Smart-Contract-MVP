@@ -742,10 +742,13 @@ def delete_email(request , doc_id, party_id):
         party = Users.objects.get(user_id=party_id)
     except Users.DoesNotExist:
         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-
     
     try:
         doc_shared = Document_shared.objects.get(doc_id = doc_id, owner_id=user, parties_id=party)
+        
+        if not doc_shared.is_accepted == 'pending':
+            return Response({'ERROR': 'cannot remove responded USER '}, status=status.HTTP_400_BAD_REQUEST)
+        
         doc_shared.delete()
         return Response({'message' : f'Deleted {party_id.email} from contract'}, status=status.HTTP_200_OK)
     except Document_shared.DoesNotExist:
