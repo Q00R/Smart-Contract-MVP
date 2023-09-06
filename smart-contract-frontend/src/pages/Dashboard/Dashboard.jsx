@@ -4,6 +4,7 @@ import Table from '../../components/Table';
 import Header from '../../components/Header';
 import documentsImage from '../../Assets/documentsImage.png'
 import uploadImage from '../../Assets/UploadImage.png'
+import sharedDocumentsImage from '../../Assets/sharedDocumentIWithMeIcon.png'
 
 
 const Dashboard = () => {
@@ -19,10 +20,34 @@ const Dashboard = () => {
                 <UploadPDF />
             </div>
 
-            <div className="container rounded-lg shadow-xl border-2 self-center w-full h-full my-5 p-5">
+            <div className="container rounded-lg shadow-xl border-2 self-center w-full h-full my-10 p-5">
                 <Header
                     imgSrc={documentsImage}
-                    heading="Documents"
+                    heading="My Documents"
+                />
+
+                <Table
+                    className="overflow-x-auto"
+
+                    colOneHeader="Name"
+                    colTwoHeader="Email"
+                    colThreeHeader="Document Status"
+
+                    colOneContent="Document Name"
+                    colTwoContent="Shared Email" // Shared Group Emails
+                    colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
+
+                    actionButton={<button className="btn btn-sm btn-outline btn-ghost">Download</button>}
+
+                />
+            </div>
+
+
+
+            <div className="container rounded-lg shadow-xl border-2 self-center w-full h-full my-10 p-5">
+                <Header
+                    imgSrc={sharedDocumentsImage}
+                    heading="Documents Shared With Me"
                 />
 
                 <Table
@@ -42,6 +67,9 @@ const Dashboard = () => {
             </div>
 
         </div>
+
+
+
     );
 };
 

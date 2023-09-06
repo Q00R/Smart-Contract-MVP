@@ -119,12 +119,12 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                 <table className="text-2xl my-10 mx-5">
                     <tbody>
                         <tr>
-                            <td class="px-2 py-2 text-base-content font-semibold">Phone:</td>
-                            <td class="px-2 py-2">{user.phone_number}</td>
-                        </tr>
-                        <tr>
                             <td class="px-2 py-2 text-base-content font-semibold">Email:</td>
                             <td class="px-2 py-2">{user.email}</td>
+                        </tr>
+                        <tr>
+                            <td class="px-2 py-2 text-base-content font-semibold">Phone:</td>
+                            <td class="px-2 py-2">{user.phone_number}</td>
                         </tr>
                         <tr>
                             <td class="px-2 py-2 text-base-content font-semibold">National ID:</td>
