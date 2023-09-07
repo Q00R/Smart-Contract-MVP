@@ -43,8 +43,43 @@ const ReviewDocument = () => {
         handleGetDocument();
     }, [sharedDocumentId]);
 
+    const handleAccept = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/confirm_document/${documentID}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'SID': Cookies.get('token')
+                }
+            });
+
+            console.log(response);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    const handleReject = async () => {
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/reject_document/${documentID}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'SID': Cookies.get('token')
+                }
+            });
+            console.log(response);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
     return (
         <div>
+
+            {/* make it look nice */}
+
             <h1>Review Document Page</h1>
             <p>Doc Title: {documentTitle}</p>
             <p>Doc Owner email: {documentOwner}</p>
@@ -54,6 +89,10 @@ const ReviewDocument = () => {
             <DownloadButton documentDownloadId={documentID} documentDownloadName={documentTitle} />
 
             {/* accept/reject button */}
+            <button onClick={handleAccept} className="btn btn-sm btn-outline btn-success">Accept</button>
+
+            <button onClick={handleReject} className="btn btn-sm btn-outline btn-error">Reject</button>
+
 
         </div>
     );
