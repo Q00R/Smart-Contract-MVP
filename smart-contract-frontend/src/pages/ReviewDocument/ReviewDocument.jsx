@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import DownloadButton from '../../components/DownloadButton';
+import GetDocumentDetailsButton from '../../components/GetDocumentDetailsButton';
 
 const ReviewDocument = () => {
     const { sharedDocumentId } = useParams();
@@ -49,7 +50,11 @@ const ReviewDocument = () => {
             <p>Doc Owner email: {documentOwner}</p>
             <p>Doc share ID: {sharedDocumentId}</p>
             <p>Doc ID: {documentID}</p>
+            <GetDocumentDetailsButton documentID={documentID} />
             <DownloadButton documentDownloadId={documentID} documentDownloadName={documentTitle} />
+
+            {/* accept/reject button */}
+
         </div>
     );
 }

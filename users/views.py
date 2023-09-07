@@ -502,12 +502,8 @@ def get_document(request, pk):
     
     data = getUser(request)
     user = data.data["user"]
-    print("user: " , user)
     try:
-        print("d5lt el try")
-        print("pk: " , pk)
         document = Documents.objects.get(document_id=pk)
-        print("document: " , document)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
         
