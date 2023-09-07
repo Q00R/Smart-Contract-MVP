@@ -517,7 +517,7 @@ def get_document_details(request, pk):
     data = getUser(request)
     user = data.data["user"]
     try:
-        document = Documents.objects.get(document_id=pk, user=user)
+        document = Documents.objects.get(document_id=pk)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
