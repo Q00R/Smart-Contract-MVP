@@ -264,10 +264,28 @@ def log_in(request):
     user = authenticate(request=request, email=email, password=password)
     if user is not None:
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+
+        # Set token expiration time
+        access_token.set_exp(from_time=timezone.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
+        
+        # Access the custom claims from the token payload
+        firstname = access_token['firstname']
+        lastname = access_token['lastname']
+        email = access_token['email']
+        nid = access_token['nid']
+        phone_number = access_token['phone_number']
+        is_active = access_token['is_active']
         return Response({ 
-        'message' : 'Login Successful',
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
+        'message': 'Login Successful',
+            'refresh': str(refresh),
+            'access': str(access_token),
+            'firstname': firstname,
+            'lastname': lastname,
+            'email': email,
+            'nid': nid,
+            'phone_number': phone_number,
+            'is_active': is_active,
     }, status=status.HTTP_200_OK)
     else:
         return Response({'message' : 'invalid login'}, status=status.HTTP_400_BAD_REQUEST)    
