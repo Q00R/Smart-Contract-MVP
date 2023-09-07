@@ -9,11 +9,11 @@ urlpatterns = [
     path('api/users/logout/' ,views.logout),
     path('api/users/documents/' ,views.documents_list),
     path('api/users/activate/' , views.activate),
-    path('api/users/email_reset/' , views.email_pass_reset),
+    path('api/users/email_reset/' , views.email_pass_reset), #send email for password reset
     path('api/users/verifyOTP/' , views.verify_otp),
     path('api/users/deactivate/' , views.deactivate),
     path('api/users/Edit/' ,views.EditAccount),
-    path('api/users/reset_password/' ,views.reset_password),
+    path('api/users/reset_password/' ,views.reset_password), #reset password
     path('api/documents/upload/' ,views.upload_pdf),
     path('api/documents/EmailAdd/<str:doc_id>/' ,views.email_add),
     path('review-share-doc/<int:pk>/', views.review_share_doc, name='review-share-doc'),
