@@ -10,7 +10,8 @@ const Table = (props) => {
             colOneContent: props.colOneContent,
             colTwoContent: props.colTwoContent,
             colThreeContent: props.colThreeContent,
-            actionButton: props.actionButton,
+            actionButton_1: props.actionButton_1,
+            actionButton_2: props.actionButton_2,
         },
     ]);
 
@@ -33,7 +34,8 @@ const Table = (props) => {
             colOneContent: props.colOneNewContent, // Modify with your data
             colTwoContent: props.colTwoNewContent,
             colThreeContent: props.colThreeNewContent,
-            actionButton: props.actionButton,
+            actionButton_1: props.actionButton_1,
+            actionButton_2: props.actionButton_2,
         };
 
         const updatedRows = [...rows, newRow];
@@ -93,7 +95,7 @@ const Table = (props) => {
 
 
     return (
-        <div className="overflow-x-auto m-5" onLoad={getDocuments}>
+        <div className="overflow-auto m-5" onLoad={getDocuments}>
             <table className="table w-full h-full">
                 {/* head */}
                 <thead>
@@ -114,7 +116,7 @@ const Table = (props) => {
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className='overflow-y-auto '>
                     {rows.map((rowData, index) => (
                         <TableRow
                             key={index}

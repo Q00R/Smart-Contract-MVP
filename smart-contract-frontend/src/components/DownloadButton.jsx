@@ -1,7 +1,9 @@
 import React from 'react';
 import Cookies from 'js-cookie';
 
-const DownloadButton = ({ documentDownloadId, documentDownloadName }) => {
+const DownloadButton = ({ documentDownloadId, documentDownloadName, buttonClass }) => {
+
+    const fixedButtonClass = "btn btn-outline btn-ghost "
 
     const handleDownload = async () => {
         console.log('documentDownloadId', documentDownloadId);
@@ -43,7 +45,7 @@ const DownloadButton = ({ documentDownloadId, documentDownloadName }) => {
     };
 
     return (
-        <button onClick={handleDownload} className="btn btn-sm btn-outline btn-ghost">Download</button>
+        <button onClick={handleDownload} className={fixedButtonClass + buttonClass}>Download</button>
     )
 }
 

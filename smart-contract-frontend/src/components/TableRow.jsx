@@ -20,7 +20,8 @@ const TableRow = ({ rowData, index, toggleCheckbox }) => {
             </td>
             <td>{rowData.colTwoContent}</td>
             <td>{rowData.colThreeContent}</td>
-            <th>{rowData.actionButton}</th>
+            <th>{rowData.actionButton_1}</th>
+            <th>{rowData.actionButton_2}</th>
         </tr>
     );
 };

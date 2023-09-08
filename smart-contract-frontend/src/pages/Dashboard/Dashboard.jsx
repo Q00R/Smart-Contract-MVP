@@ -6,6 +6,9 @@ import documentsImage from '../../Assets/documentsImage.png'
 import uploadImage from '../../Assets/UploadImage.png'
 import sharedDocumentsImage from '../../Assets/sharedDocumentIWithMeIcon.png'
 import DownloadButton from '../../components/DownloadButton';
+import GetDocumentDetailsButton from '../../components/GetDocumentDetailsButton';
+import DocumentDetailsModal from '../../components/DocumentDetailsModal';
+import Cookies from 'js-cookie';
 
 
 const Dashboard = () => {
@@ -38,7 +41,8 @@ const Dashboard = () => {
                     colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
-                    actionButton={<button className="btn btn-sm btn-outline btn-ghost">Download</button>}
+                    actionButton_1={<DownloadButton />}
+                    actionButton_2={<GetDocumentDetailsButton />}
 
                 />
             </div>
@@ -62,7 +66,8 @@ const Dashboard = () => {
                     colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
-                    actionButton={<DownloadButton />}
+                    actionButton_1={<DownloadButton />}
+                    actionButton_2={<GetDocumentDetailsButton />}
 
                 />
             </div>
