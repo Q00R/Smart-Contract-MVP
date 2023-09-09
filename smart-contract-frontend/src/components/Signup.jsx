@@ -98,7 +98,16 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                let user = {
+                    "user_id": data.user.user_id,
+                    "email": data.user.email,
+                    "firstname": data.user.firstname,
+                    "lastname": data.user.lastname,
+                    "nid": data.user.nid,
+                    "phone_number": data.user.phone_number,
+                    "is_activated": data.is_activated,
+                }
+                localStorage.setItem('user', JSON.stringify(user));
                 Cookies.set('token', data.token['token'], { expires: 1 / 24 });
                 sendOTP();
             }

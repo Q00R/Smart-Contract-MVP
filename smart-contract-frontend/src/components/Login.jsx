@@ -50,7 +50,16 @@ export default function Login() {
             console.log(data);
 
             // save user info in local storage
-            localStorage.setItem('user', JSON.stringify(data.user));
+            let user = {
+                "user_id": data.user.user_id,
+                "email": data.user.email,
+                "firstname": data.user.firstname,
+                "lastname": data.user.lastname,
+                "nid": data.user.nid,
+                "phone_number": data.user.phone_number,
+                "is_activated": data.is_activated,
+            }
+            localStorage.setItem('user', JSON.stringify(user));
 
             //set cookie expiration to 1 hour
             Cookies.set('token', data.token['token'], { expires: 1 / 24 });

@@ -5,7 +5,7 @@ import EditAccountModal from './EditAccountModal';
 import ResetPasswordModal from './ResetPasswordModal';
 
 const UserprofileCard = ({ isOpen, onRequestClose }) => {
-    const [isActivated, setIsActivated] = useState(localStorage.getItem('user').isActivated); // Initialize the state
+    const [isActivated, setIsActivated] = useState(localStorage.getItem('user').is_activated); // Initialize the state
 
     const isActivatedClassName = 'mr-5 mt-12 w-auto btn-sm btn btn-outline btn-success';
     const isActivatedText = 'Activate';
@@ -56,7 +56,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
 
                 //save the updated user info in local storage
                 const user = JSON.parse(localStorage.getItem('user'));
-                user.isActivated = false;
+                user.is_activated = false;
                 localStorage.setItem('user', JSON.stringify(user));
 
                 //redirect to dashboard
@@ -88,7 +88,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
 
             //save the updated user info in local storage
             const user = JSON.parse(localStorage.getItem('user'));
-            user.isActivated = true;
+            user.is_activated = true;
             localStorage.setItem('user', JSON.stringify(user));
 
 
@@ -104,7 +104,9 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
     const user = JSON.parse(localStorage.getItem('user'));
     useEffect(() => {
         // Check the user's activation status from localStorage when the component mounts
-        setIsActivated(user.isActivated);
+        setIsActivated(user.is_activated);
+
+        console.log("meorwwww", user);
     }, []);
 
     return (
