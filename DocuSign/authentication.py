@@ -1,7 +1,6 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError, AuthenticationFailed
+from rest_framework_simplejwt.exceptions import InvalidToken, AuthenticationFailed
 from rest_framework_simplejwt.settings import api_settings
-from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy
 from rest_framework_simplejwt.utils import format_lazy
 

@@ -1,8 +1,6 @@
-from rest_framework.serializers import ModelSerializer , SerializerMethodField
 from rest_framework import serializers
 from .models import Users , Documents , Document_shared, OneTimePassword 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -44,8 +42,3 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return token
 
-
-# class SessionSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Session
-#         fields = ['user_id', 'token']
