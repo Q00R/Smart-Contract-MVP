@@ -15,7 +15,7 @@ const TableRow = ({ rowData, index, toggleCheckbox }) => {
             </th>
             <td>
                 <div className="flex items-center space-x-3">
-                    {rowData.colOneContent}
+                    {rowData.colOneContent} {/* Display the document name */}
                 </div>
             </td>
             <td>{rowData.colTwoContent}</td>

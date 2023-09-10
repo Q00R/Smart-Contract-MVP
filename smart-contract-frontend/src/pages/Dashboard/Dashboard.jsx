@@ -31,10 +31,11 @@ const Dashboard = () => {
                 />
 
                 <Table
+                    isOwnedDocumentsTable={true}
                     className="overflow-x-auto"
 
                     colOneHeader="Name"
-                    colTwoHeader="Email"
+                    colTwoHeader="Shared Parties Emails"
                     colThreeHeader="Document Status"
 
                     colOneContent="Document Name"
@@ -56,10 +57,11 @@ const Dashboard = () => {
                 />
 
                 <Table
+                    isOwnedDocumentsTable={false}
                     className="overflow-x-auto"
 
                     colOneHeader="Name"
-                    colTwoHeader="Email"
+                    colTwoHeader="Owner Email"
                     colThreeHeader="Document Status"
 
                     colOneContent="Document Name"

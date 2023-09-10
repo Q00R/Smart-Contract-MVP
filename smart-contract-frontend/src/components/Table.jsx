@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import TableRow from './TableRow';
 import Cookies from 'js-cookie';
+import DownloadButton from './DownloadButton';
+import GetDocumentDetailsButton from './GetDocumentDetailsButton';
 
 const Table = (props) => {
     const [selectAll, setSelectAll] = useState(false);
-    const [rows, setRows] = useState([
-        {
-            isChecked: false,
-            colOneContent: props.colOneContent,
-            colTwoContent: props.colTwoContent,
-            colThreeContent: props.colThreeContent,
-            actionButton_1: props.actionButton_1,
-            actionButton_2: props.actionButton_2,
-        },
-    ]);
+    const [rows, setRows] = useState([]);
+    const [isLoading, setIsLoading] = useState(true); // Add loading state
+
+    //store the documents that come from the get all user documents request
+    const [ownedDocuments, setOwnedDocuments] = useState([]);
+    const [sharedDocuments, setSharedDocuments] = useState([]);
+
+    const [actionButton_1, setActionButton_1] = useState();
+    const [actionButton_2, setActionButton_2] = useState();
+
 
     const toggleSelectAll = () => {
         const updatedRows = rows.map((row) => ({ ...row, isChecked: !selectAll }));
@@ -47,17 +49,20 @@ const Table = (props) => {
     const getDocuments = async () => {
 
         try {
-
-            fetch('http://localhost:8000/api/users/documents/', {
+            await fetch('http://localhost:8000/api/users/documents/', {
                 method: 'GET',
                 headers: {
                     'SID': Cookies.get('token'),
                 },
             }).then(response => response.json())
                 .then(data => {
+                    // Assuming data is an array and contains ownedDocuments and sharedDocuments
                     console.log(data);
-                    setRowData(data);
-                    return data;
+                    setOwnedDocuments(data['user_documents']);
+                    setSharedDocuments(data['shared_documents']);
+                    console.log('owned documents: ', ownedDocuments);
+                    console.log('shared documents: ', sharedDocuments);
+                    setRowData();
                 });
         } catch (error) {
             console.error('Error Loading files:', error);
@@ -85,60 +90,95 @@ const Table = (props) => {
     };
 
     useEffect(() => {
-        getDocumentDetails(5);
+        getDocuments();
     }, []);
 
     const setRowData = async () => {
+        if (props.isOwnedDocumentsTable) {
+            console.log('owned documents: ', ownedDocuments);
 
+            // Create rows from the documents
+            const newRows = ownedDocuments.map((document, index) => {
+                const actionButton1 = (
+                    <DownloadButton
+                        documentDownloadId={document.id}
+                        documentDownloadName={document.document_name}
+                        buttonClass="btn btn-outline btn-ghost"
+                    />
+                );
+
+                return {
+                    isChecked: false,
+                    colOneContent: document.document_name,
+                    actionButton_1: actionButton1,
+                    // Add other properties as needed
+                };
+            });
+
+            setRows(newRows);
+        } else {
+            // Create rows from the documents
+            const newRows = sharedDocuments.map((document, index) => ({
+                isChecked: false,
+                // colOneContent: document.someProperty,
+                // actionButton_1: actionButton_1,
+                // Add other properties as needed
+            }));
+
+            setRows(newRows);
+        }
+
+        setIsLoading(false); // Data loading is complete
     };
-
 
 
     return (
         <div className="overflow-auto m-5" onLoad={getDocuments}>
-            <table className="table w-full h-full">
-                {/* head */}
-                <thead>
-                    <tr>
-                        <th>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    className="checkbox"
-                                    checked={selectAll}
-                                    onChange={toggleSelectAll}
-                                />
-                            </label>
-                        </th>
-                        <th>{props.colOneHeader}</th>
-                        <th>{props.colTwoHeader}</th>
-                        <th>{props.colThreeHeader}</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody className='overflow-y-auto '>
-                    {rows.map((rowData, index) => (
-                        <TableRow
-                            key={index}
-                            rowData={rowData}
-                            index={index}
-                            toggleCheckbox={toggleCheckbox}
-                        />
-                    ))}
-                </tbody>
-                {/* foot */}
-                <tfoot>
-                    <tr>
-                        <th></th>
-                        <th>{props.colOneHeader}</th>
-                        <th>{props.colTwoHeader}</th>
-                        <th>{props.colThreeHeader}</th>
-                        <th></th>
-                    </tr>
-                </tfoot>
-            </table>
-            {/* TODO just for testing, remove */}
-            <button onClick={addRow}>Add Row</button>
+            {isLoading ? ( // Display loading content if isLoading is true
+                <p>Loading...</p>
+            ) : (
+                <table className="table w-full h-full">
+                    {/* head */}
+                    <thead>
+                        <tr>
+                            <th>
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox"
+                                        checked={selectAll}
+                                        onChange={toggleSelectAll}
+                                    />
+                                </label>
+                            </th>
+                            <th>{props.colOneHeader}</th>
+                            <th>{props.colTwoHeader}</th>
+                            <th>{props.colThreeHeader}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody className='overflow-y-auto '>
+                        {rows.map((rowData, index) => (
+                            <TableRow
+                                key={index}
+                                rowData={rowData}
+                                index={index}
+                                toggleCheckbox={toggleCheckbox}
+                            />
+                        ))}
+                    </tbody>
+                    {/* foot */}
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>{props.colOneHeader}</th>
+                            <th>{props.colTwoHeader}</th>
+                            <th>{props.colThreeHeader}</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            )}
         </div>
     );
 };
