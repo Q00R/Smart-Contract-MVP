@@ -263,28 +263,37 @@ def log_in(request):
     password = request.data.get('password')
     user = authenticate(request=request, email=email, password=password)
     if user is not None:
-        refresh = RefreshToken.for_user(user)
-        access_token = refresh.access_token
+        serializer = MyTokenObtainPairSerializer()
+        tokens = serializer.get_token(user)
+        access_token = tokens.access_token
+        refresh = tokens
+        # refresh = RefreshToken.for_user(user)
+        # access_token = refresh.access_token
 
         # Set token expiration time
         access_token.set_exp(from_time=timezone.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
         
         # Access the custom claims from the token payload
-        firstname = access_token['firstname']
-        lastname = access_token['lastname']
-        email = access_token['email']
-        nid = access_token['nid']
-        phone_number = access_token['phone_number']
-        is_active = access_token['is_active']
+        user_id = access_token.payload.get('user_id')
+        firstname = access_token.payload.get('firstname')
+        lastname = access_token.payload.get('lastname')
+        email = access_token.payload.get('email')
+        nid = access_token.payload.get('nid')
+        phone_number = access_token.payload.get('phone_number')
+        is_active = access_token.payload.get('is_active')
         return Response({ 
-        'message': 'Login Successful',
+        'message': 'login successful',
+        "token" :{
             'refresh': str(refresh),
-            'access': str(access_token),
+            'access': str(access_token),},
+        "user":{
+            'user_id' : user_id,
             'firstname': firstname,
             'lastname': lastname,
             'email': email,
             'nid': nid,
             'phone_number': phone_number,
+        },
             'is_active': is_active,
     }, status=status.HTTP_200_OK)
     else:
