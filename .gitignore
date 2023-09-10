@@ -1,0 +1,184 @@
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+media
+
+# Backup files # 
+*.bak 
+
+# If you are using PyCharm # 
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Python # 
+*.py[cod] 
+*$py.class 
+
+# Distribution / packaging 
+.Python build/ 
+develop-eggs/ 
+dist/ 
+downloads/ 
+eggs/ 
+.eggs/ 
+lib/ 
+lib64/ 
+parts/ 
+sdist/ 
+var/ 
+wheels/ 
+*.egg-info/ 
+.installed.cfg 
+*.egg 
+*.manifest 
+*.spec 
+
+# Installer logs 
+pip-log.txt 
+pip-delete-this-directory.txt 
+
+# Unit test / coverage reports 
+htmlcov/ 
+.tox/ 
+.coverage 
+.coverage.* 
+.cache 
+.pytest_cache/ 
+nosetests.xml 
+coverage.xml 
+*.cover 
+.hypothesis/ 
+
+# Jupyter Notebook 
+.ipynb_checkpoints 
+
+# pyenv 
+.python-version 
+
+# celery 
+celerybeat-schedule.* 
+
+# SageMath parsed files 
+*.sage.py 
+
+# Environments 
+.env 
+.venv 
+env/ 
+venv/ 
+ENV/ 
+env.bak/ 
+venv.bak/ 
+
+# mkdocs documentation 
+/site 
+
+# mypy 
+.mypy_cache/ 
+
+# Sublime Text # 
+*.tmlanguage.cache 
+*.tmPreferences.cache 
+*.stTheme.cache 
+*.sublime-workspace 
+*.sublime-project 
+
+# sftp configuration file 
+sftp-config.json 
+
+# Package control specific files Package 
+Control.last-run 
+Control.ca-list 
+Control.ca-bundle 
+Control.system-ca-bundle 
+GitHub.sublime-settings 
+
+# Visual Studio Code # 
+.vscode/* 
+!.vscode/settings.json 
+!.vscode/tasks.json 
+!.vscode/launch.json 
+!.vscode/extensions.json 
+.history
+
+users/__pycache__/
+users/migrations/__pycache__/
+DocuSign/__pycache__/
+documents/L.8_-_S.E_-_Functional_Programming_II.pdf.zip
+users/__pycache__/__init__.cpython-311.pyc
+users/__pycache__/admin.cpython-311.pyc
+users/__pycache__/apps.cpython-311.pyc
+users/__pycache__/models.cpython-311.pyc
+users/__pycache__/serializers.cpython-311.pyc
+users/__pycache__/urls.cpython-311.pyc
+users/__pycache__/views.cpython-311.pyc
+users/migrations/__init__.py
+users/migrations/0001_initial.py
+users/migrations/0002_users_is_activated.py
+users/migrations/0003_users_salt.py
+users/migrations/0004_alter_documents_timestamp_alter_users_email_and_more.py
+users/migrations/0005_alter_users_email.py
+users/migrations/0006_remove_users_password.py
+users/migrations/0007_otps.py
+users/migrations/0008_onetimepassword_delete_otps.py
+users/migrations/0009_alter_onetimepassword_timestamp.py
+users/migrations/0010_alter_onetimepassword_timestamp.py
+users/migrations/0011_alter_onetimepassword_timestamp.py
+users/migrations/0012_alter_onetimepassword_timestamp.py
+users/migrations/0013_alter_onetimepassword_timestamp.py
+users/migrations/0014_users_password.py
+users/migrations/0015_alter_users_email.py
+users/migrations/0016_remove_users_username_documents_document_file_and_more.py
+users/migrations/0017_session_remove_document_shared_document_unique_and_more.py
+users/migrations/0018_alter_users_email.py
+users/migrations/__pycache__/__init__.cpython-311.pyc
+users/migrations/__pycache__/0001_initial.cpython-311.pyc
+users/migrations/__pycache__/0002_users_is_activated.cpython-311.pyc
+users/migrations/__pycache__/0003_users_salt.cpython-311.pyc
+users/migrations/__pycache__/0004_alter_documents_timestamp_alter_users_email_and_more.cpython-311.pyc
+users/migrations/__pycache__/0005_alter_users_email.cpython-311.pyc
+users/migrations/__pycache__/0006_remove_users_password.cpython-311.pyc
+users/migrations/__pycache__/0007_otps.cpython-311.pyc
+users/migrations/__pycache__/0008_onetimepassword_delete_otps.cpython-311.pyc
+users/migrations/__pycache__/0009_alter_onetimepassword_timestamp.cpython-311.pyc
+users/migrations/__pycache__/0010_alter_onetimepassword_timestamp.cpython-311.pyc
+users/migrations/__pycache__/0011_alter_onetimepassword_timestamp.cpython-311.pyc
+users/migrations/__pycache__/0012_alter_onetimepassword_timestamp.cpython-311.pyc
+users/migrations/__pycache__/0013_alter_onetimepassword_timestamp.cpython-311.pyc
+users/migrations/__pycache__/0014_users_password.cpython-311.pyc
+users/migrations/__pycache__/0015_alter_users_email.cpython-311.pyc
