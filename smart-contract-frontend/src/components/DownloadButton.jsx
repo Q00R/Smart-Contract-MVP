@@ -7,6 +7,7 @@ const DownloadButton = ({ documentDownloadId, documentDownloadName, buttonClass 
 
     const handleDownload = async () => {
         console.log('documentDownloadId', documentDownloadId);
+        console.log('documentDownloadName', documentDownloadName);
 
         try {
             const response = await fetch(`http://localhost:8000/api/documents/${documentDownloadId}/retrieve/`, {

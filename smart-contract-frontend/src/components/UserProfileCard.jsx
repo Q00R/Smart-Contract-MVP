@@ -98,15 +98,33 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
         } catch (error) {
             console.error('Error:', error);
         }
-
     };
+
+    const handleSendResetPassword = async () => {
+        try {
+            console.log("Sending OTP");
+
+            console.log(Cookies.get('token'));
+
+            const response = await fetch('http://localhost:8000/api/users/email_reset/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                },
+            });
+            const data = await response.json();
+            setisResetPasswordModalOpen(true);
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     const user = JSON.parse(localStorage.getItem('user'));
     useEffect(() => {
         // Check the user's activation status from localStorage when the component mounts
         setIsActivated(user.is_activated);
-
-        console.log("meorwwww", user);
     }, []);
 
     return (
@@ -137,7 +155,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                                 <button onClick={handleOpenEditAccountModal} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-info'>Edit Account</button>
                             </td>
                             <td>
-                                <button onClick={handleOpenResetPasswordModal} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-warning'>Reset Password</button>
+                                <button onClick={handleSendResetPassword} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-warning'>Reset Password</button>
                             </td>
                         </tr>
                         <tr>
@@ -155,7 +173,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                 </table>
                 <OTPVerificationModal isOpen={isVerifyModalOpen} onRequestClose={handleCloseVerifyModal} userEmail={user.email} />
                 <EditAccountModal isOpen={isEditAccountModalOpen} onRequestClose={handleCloseEditAccountModal} />
-                <ResetPasswordModal isOpen={isResetPasswordModalOpen} onRequestClose={handleCloseResetPasswordModal} />
+                <ResetPasswordModal isOpen={isResetPasswordModalOpen} onRequestClose={handleCloseResetPasswordModal} userEmail={user.email} />
             </div>
         </div>
     );

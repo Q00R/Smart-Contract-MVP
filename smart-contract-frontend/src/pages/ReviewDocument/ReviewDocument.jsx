@@ -40,6 +40,7 @@ const ReviewDocument = () => {
                     'Document Timestamp': data['doc'].timestamp,
 
                 });
+                setDocumentID(data['doc'].document_id);
                 console.log('documentDetails', documentDetails);
 
 

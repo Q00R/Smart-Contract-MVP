@@ -61,7 +61,6 @@ const Table = (props) => {
                     setOwnedDocuments(data['user_documents']);
                     setSharedDocuments(data['shared_documents']);
                     console.log('owned documents: ', ownedDocuments);
-                    console.log('shared documents: ', sharedDocuments);
                     setRowData();
                 });
         } catch (error) {
