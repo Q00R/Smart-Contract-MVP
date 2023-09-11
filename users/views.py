@@ -28,7 +28,6 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django.urls import reverse
-
 #--------
 
 from django.shortcuts import get_object_or_404
