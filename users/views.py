@@ -306,13 +306,9 @@ def login(request):
         token.generate_token()
         token.save()
         tokenser = SessionSerializer(token)
-        headers = {
-        "Authorization":  token.token 
-        }
         
         response = Response({"message":"login successful", "token": tokenser.data, "user": userser.data, "is_activated": user.is_activated}  )#headers = headers
         #response.set_cookie('token', token.token) #expires=token.expires_at        
-        response["header"] = token.token
         
         return response
         
@@ -676,6 +672,7 @@ def get_confirmation(request, doc_id):
             break
     
     if accept:
+        #hean han3mel call ll method ely hat7ot el hash doc wel id fel blockchain
         acc_docs = DocumentSharedSerializer(docs, many=True)
         return Response({'message : All other parties have accepted', acc_docs.data}, status=status.HTTP_200_OK)
     
