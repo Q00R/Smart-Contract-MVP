@@ -685,7 +685,12 @@ def get_all_shared(request, doc_id):
     user = data.data["user"]
 
     try:
-        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
+        document = Documents.objects.get(pk=doc_id, user=user)
+    except Documents.DoesNotExist:
+        return Response({'message' : 'Cannot find document'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        docs = Document_shared.objects.filter(doc_id = document , owner_id=user)
         docs_ser = DocumentSharedSerializer(docs, many=True)
         return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
     except Document_shared.DoesNotExist:
