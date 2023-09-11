@@ -731,7 +731,7 @@ def delete_email(request , doc_id, party_id):
     try:
         doc = Documents.objects.get(pk=doc_id)
     except Documents.DoesNotExist:
-        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Documents not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     if doc.is_completed:
         return Response({'ERROR': 'Document is uploaded on BC.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
