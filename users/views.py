@@ -476,15 +476,12 @@ def get_document(request, pk):
     data = getUser(request)
     user = data.data["user"]
     try:
-        document = Documents.objects.get(document_id=pk)
-        
+        document = Documents.objects.get(document_id=pk)        
         if document.user != user:
             try:
                 doc_shared = Document_shared.objects.get(doc_id= document , parties_id = user)
             except Document_shared.DoesNotExist:
                 return Response({'message': 'NOT ALLOWED TO DOWNLOAD'}, status=status.HTTP_401_UNAUTHORIZED)
-
-        
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
         
