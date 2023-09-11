@@ -543,6 +543,9 @@ def reject_document(request, doc_id):
     except Document_shared.DoesNotExist:
         return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
     
+    if not docsh_id.is_accepted == 'pending':
+        return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='rejected', time_a_r = timezone.now())
     return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
 
@@ -557,6 +560,9 @@ def confirm_document(request, doc_id):
         doc = Document_shared.objects.get(doc_id = doc_id , parties_id=user)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not doc.is_accepted == 'pending':
+        return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='accepted', time_a_r = timezone.now())
     
@@ -670,3 +676,23 @@ def delete_email(request , doc_id, party_id):
         return Response({'message' : f'Deleted {party_id.email} from contract'}, status=status.HTTP_200_OK)
     except Document_shared.DoesNotExist:
         return Response({'message' : f'Could not find a shared record {doc_shared} with {party}'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([CustomJWTAuthentication])
+def get_shared_email(request, doc_id):
+    user = request.user
+
+    try:
+        document = Documents.objects.get(pk=doc_id, user=user)
+    except Documents.DoesNotExist:
+        return Response({'message' : 'Cannot find document'}, status=status.HTTP_404_NOT_FOUND)
+    
+    try :
+        doc_shared = Document_shared.objects.filter(doc_id=document, owner_id=user)
+    except Document_shared.DoesNotExist:
+        return Response({'message' : 'You have not shared this document with anyone'}, status=status.HTTP_404_NOT_FOUND)
+
+    doc_ser = DocumentSharedSerializer(doc_shared)
+    return Response({'doc_shared' : doc_ser.data}, status=status.HTTP_202_ACCEPTED)
