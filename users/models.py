@@ -4,19 +4,61 @@ from django import forms
 import random
 from datetime import timedelta
 import uuid
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 #from django.contrib.auth.models import AbstractUser
 #from django.contrib.auth.models import User
 #generate_key_pair generate public and private key in user model and the two fields 
-class Users(models.Model):
-    user_id = models.AutoField(primary_key=True)
+
+class UsersManager(BaseUserManager):
+    def _create_user(self, email, password, firstname, lastname, nid, phone_number, **extra_fields):
+        if not email:
+            raise ValueError("Email must be provided")
+        if not password:
+            raise ValueError('Password is not provided')
+
+        user = self.model(
+            email = self.normalize_email(email),
+            firstname = firstname,
+            lastname = lastname,
+            nid = nid,
+            phone_number = phone_number,
+            **extra_fields
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password, firstname, lastname, nid, phone_number, **extra_fields):
+        extra_fields.setdefault('is_staff',False)
+        extra_fields.setdefault('is_active',False)
+        extra_fields.setdefault('is_superuser',False)
+        return self._create_user(email, password, firstname, lastname, nid, phone_number, **extra_fields)
+
+    def create_superuser(self, email, password, firstname, lastname, nid, phone_number, **extra_fields):
+        extra_fields.setdefault('is_staff',True)
+        extra_fields.setdefault('is_active',True)
+        extra_fields.setdefault('is_superuser',True)
+        return self._create_user(email, password, firstname, lastname, nid, phone_number, **extra_fields)
+
+class Users(AbstractBaseUser, PermissionsMixin):
+    id = models.AutoField(primary_key=True)
     firstname = models.CharField(max_length=250 , blank=False, null=True)
     lastname = models.CharField(max_length=250, blank=False, null=True)
-    email = models.EmailField(unique=True, blank=False, null=True) #models.EmailField(unique=True)
-    password =  models.TextField(blank=False, null=True)     #forms.CharField(widget=forms.PasswordInput)
-    is_activated = models.BooleanField(default=False)
+    email = models.EmailField(db_index=True, unique=True, blank=False, null=True) #models.EmailField(unique=True)
+     # password =  models.TextField(blank=False, null=True)     #forms.CharField(widget=forms.PasswordInput)
     nid = models.TextField(unique=True,blank=True, null=True)
     phone_number = models.TextField(unique=True,blank=True, null=True)
-    salt = models.TextField(blank=True, null=False)
+    
+    
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    objects = UsersManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['firstname', 'lastname', 'nid', 'phone_number']
     
 
     class Meta:
@@ -24,7 +66,7 @@ class Users(models.Model):
         
         
     def __str__(self):
-        return self.firstname
+        return self.email
         
         
 #add signature field to sign the Document with private key of owner (sign_document)
@@ -61,8 +103,7 @@ class Document_shared(models.Model):
     class Meta:
         db_table = 'documents_shared'
 
-
-
+        
 class OneTimePassword(models.Model):
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
     otp = models.CharField(4)
@@ -75,27 +116,4 @@ class OneTimePassword(models.Model):
         new_time = self.timestamp + timedelta(minutes=2)
         if timezone.now() <= new_time:
             return False
-        return True
-
-
-class Session(models.Model):
-    id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
-    token = models.TextField(unique=True, blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    expires_at = models.DateTimeField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Session id: {self.id}, User id: {self.user_id}"
-
-    def generate_token(self):
-        self.token = str(uuid.uuid4())
-        self.expires_at = timezone.now() + timedelta(hours=1)
-
-    def is_expired(self):    
-        print("self.expires_at: " , self.expires_at)
-        if timezone.now() >= self.expires_at:
-            #self.delete()
-            return True
-        return False
-        
+        return True        
