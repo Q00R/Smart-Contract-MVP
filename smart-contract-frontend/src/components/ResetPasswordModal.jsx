@@ -45,19 +45,22 @@ const ResetPasswordModal = ({ isOpen, onRequestClose, userEmail }) => {
 
         try {
 
+            let req = {
+                'otp': enteredOTP,
+                'password': newPassword
+            }
+
             const response = await fetch('http://localhost:8000/api/users/reset_password/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     "SID": Cookies.get('token'), // Include the token in the custom "SID" header
                 },
-                body: {
-                    'otp': enteredOTP,
-                    'password': newPassword
-                },
+                body: JSON.stringify(req)
             });
             const data = await response.json();
             console.log(data);
+            window.location.reload();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -122,7 +125,7 @@ const ResetPasswordModal = ({ isOpen, onRequestClose, userEmail }) => {
                                                 type="password"
                                                 placeholder='Enter new password'
                                                 name=""
-                                                value={newPassword} // Bind the value to the state
+                                                value={confirmPassword} // Bind the value to the state
                                                 onChange={(event) => setConfirmPassword(event.target.value)} // Handle change and update the state
                                             />
                                         </div>
@@ -167,11 +170,11 @@ const ResetPasswordModal = ({ isOpen, onRequestClose, userEmail }) => {
                                                 name=""
                                                 id="Digit_4"
                                                 maxLength="1"
-                                                onInput={() => handleReset()}
                                             />
                                         </div>
                                     </div>
                                     <div className="flex flex-col space-y-5">
+                                        <button onClick={handleReset} className="btn btn-primary w-full max-w-xs self-center">Reset Password</button>
                                         <p className='self-center'>{verificationStatus}</p>
                                         <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-base-content">
                                             <p>Didn't recieve code?</p> <button className="flex flex-row items-center text-primary" onClick={sendOTP}>Resend</button>
