@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+# from users.backends import CustomJWTAuthentication
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +31,30 @@ SECRET_KEY = 'django-insecure-c=43ke@8uiarfd)q1(^1a#c^we*0baj0p335b()h0_!nkd^ue0
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES' : (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'DocuSign.authentication.CustomJWTAuthentication'
+    ),
+}
+
+# JWT settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=3),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
+    'UPDATE_LAST_LOGIN': True,
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=7),
+    'SLIDING_TOKEN_REFRESH_DELTA': timedelta(days=6),
+    'SLIDING_TOKEN_ALGORITHM': 'HS256',
+    'SLIDING_TOKEN_VERIFYING_KEY': None,  # Use 'SECRET_KEY' from settings by default
+    'SLIDING_TOKEN_LEEWAY': timedelta(seconds=1),
+    'SLIDING_TOKEN_REFRESH_LEEWAY': timedelta(days=0),
+    'USER_AUTHENTICATION_RULE' : 'DocuSign.authentication.custom_user_authentication_rule',
+    'UPDATE_LAST_LOGIN': True,
+    'OKEN_OBTAIN_SERIALIZER': 'users.serializers.MyTokenObtainPairSerializer',
+}
 
 APPEND_SLASH = True
 
@@ -47,7 +73,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
+    'DocuSign.authentication',
 ]
+
+AUTH_USER_MODEL = 'users.Users'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -109,6 +139,11 @@ DATABASES = {
         'PORT': '5432',          # Leave empty to use the default PostgreSQL port (usually 5432)
     }
 }
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    'users.backends.EmailBackend',
+]
 
 
 # Password validation
@@ -152,7 +187,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+LOGIN_URL = '/api/users/login/'
 path = Path('.env')
 load_dotenv(dotenv_path=path)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

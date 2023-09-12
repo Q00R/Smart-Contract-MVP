@@ -5,7 +5,7 @@ import EditAccountModal from './EditAccountModal';
 import ResetPasswordModal from './ResetPasswordModal';
 
 const UserprofileCard = ({ isOpen, onRequestClose }) => {
-    const [isActivated, setIsActivated] = useState(localStorage.getItem('user').isActivated); // Initialize the state
+    const [isActivated, setIsActivated] = useState(localStorage.getItem('user').is_activated); // Initialize the state
 
     const isActivatedClassName = 'mr-5 mt-12 w-auto btn-sm btn btn-outline btn-success';
     const isActivatedText = 'Activate';
@@ -56,7 +56,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
 
                 //save the updated user info in local storage
                 const user = JSON.parse(localStorage.getItem('user'));
-                user.isActivated = false;
+                user.is_activated = false;
                 localStorage.setItem('user', JSON.stringify(user));
 
                 //redirect to dashboard
@@ -88,7 +88,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
 
             //save the updated user info in local storage
             const user = JSON.parse(localStorage.getItem('user'));
-            user.isActivated = true;
+            user.is_activated = true;
             localStorage.setItem('user', JSON.stringify(user));
 
 
@@ -98,13 +98,33 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
         } catch (error) {
             console.error('Error:', error);
         }
-
     };
+
+    const handleSendResetPassword = async () => {
+        try {
+            console.log("Sending OTP");
+
+            console.log(Cookies.get('token'));
+
+            const response = await fetch('http://localhost:8000/api/users/email_reset/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                },
+            });
+            const data = await response.json();
+            setisResetPasswordModalOpen(true);
+
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     const user = JSON.parse(localStorage.getItem('user'));
     useEffect(() => {
         // Check the user's activation status from localStorage when the component mounts
-        setIsActivated(user.isActivated);
+        setIsActivated(user.is_activated);
     }, []);
 
     return (
@@ -119,12 +139,12 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                 <table className="text-2xl my-10 mx-5">
                     <tbody>
                         <tr>
-                            <td class="px-2 py-2 text-base-content font-semibold">Phone:</td>
-                            <td class="px-2 py-2">{user.phone_number}</td>
-                        </tr>
-                        <tr>
                             <td class="px-2 py-2 text-base-content font-semibold">Email:</td>
                             <td class="px-2 py-2">{user.email}</td>
+                        </tr>
+                        <tr>
+                            <td class="px-2 py-2 text-base-content font-semibold">Phone:</td>
+                            <td class="px-2 py-2">{user.phone_number}</td>
                         </tr>
                         <tr>
                             <td class="px-2 py-2 text-base-content font-semibold">National ID:</td>
@@ -135,7 +155,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                                 <button onClick={handleOpenEditAccountModal} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-info'>Edit Account</button>
                             </td>
                             <td>
-                                <button onClick={handleOpenResetPasswordModal} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-warning'>Reset Password</button>
+                                <button onClick={handleSendResetPassword} className='mr-5 mt-12 w-auto btn-sm btn btn-outline btn-warning'>Reset Password</button>
                             </td>
                         </tr>
                         <tr>
@@ -153,7 +173,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                 </table>
                 <OTPVerificationModal isOpen={isVerifyModalOpen} onRequestClose={handleCloseVerifyModal} userEmail={user.email} />
                 <EditAccountModal isOpen={isEditAccountModalOpen} onRequestClose={handleCloseEditAccountModal} />
-                <ResetPasswordModal isOpen={isResetPasswordModalOpen} onRequestClose={handleCloseResetPasswordModal} />
+                <ResetPasswordModal isOpen={isResetPasswordModalOpen} onRequestClose={handleCloseResetPasswordModal} userEmail={user.email} />
             </div>
         </div>
     );
