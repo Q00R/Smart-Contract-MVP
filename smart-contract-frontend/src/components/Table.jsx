@@ -61,6 +61,7 @@ const Table = (props) => {
                     setOwnedDocuments(data['user_documents']);
                     setSharedDocuments(data['shared_documents']);
                     console.log('owned documents: ', ownedDocuments);
+                    console.log('shared documents: ', sharedDocuments);
                     setRowData();
                 });
         } catch (error) {
@@ -98,18 +99,29 @@ const Table = (props) => {
 
             // Create rows from the documents
             const newRows = ownedDocuments.map((document, index) => {
+
                 const actionButton1 = (
+                    <GetDocumentDetailsButton
+                        documentDetails={document}
+                        buttonClass="btn btn-outline btn-ghost"
+                    />
+                );
+
+                const actionButton2 = (
                     <DownloadButton
-                        documentDownloadId={document.id}
+                        documentDownloadId={document.document_id}
                         documentDownloadName={document.document_name}
                         buttonClass="btn btn-outline btn-ghost"
                     />
                 );
 
+                // sharedEmails = getSharedEmails(document.document_id);
+
                 return {
                     isChecked: false,
                     colOneContent: document.document_name,
                     actionButton_1: actionButton1,
+                    actionButton_2: actionButton2,
                     // Add other properties as needed
                 };
             });

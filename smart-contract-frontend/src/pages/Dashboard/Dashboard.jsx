@@ -42,8 +42,8 @@ const Dashboard = () => {
                     colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
-                // actionButton_1={<DownloadButton />}
-                // actionButton_2={<GetDocumentDetailsButton />}
+                    actionButton_1={<DownloadButton />}
+                    actionButton_2={<GetDocumentDetailsButton />}
 
                 />
             </div>
@@ -68,8 +68,8 @@ const Dashboard = () => {
                     colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
-                // actionButton_1={<DownloadButton />}
-                // actionButton_2={<GetDocumentDetailsButton />}
+                    actionButton_1={<DownloadButton />}
+                    actionButton_2={<GetDocumentDetailsButton />}
 
                 />
             </div>
