@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import Modal from 'react-modal';
+import Modal from 'react-modal'
 import Cookies from 'js-cookie';
 
-function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
+
+const ResetPasswordModal = ({ isOpen, onRequestClose, userEmail }) => {
+
     const [verificationStatus, setVerificationStatus] = useState('');
+    const [newPassword, setNewPassword] = useState(''); // Initialize the state
+    const [confirmPassword, setConfirmPassword] = useState(''); // Initialize the state
 
     const handleDigitChange = (event, nextField) => {
         const input = event.target;
@@ -21,63 +25,46 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
 
     // Inside the OTPVerificationModal component
 
-    const handleVerify = async () => {
+    const handleReset = async () => {
+
+        // Collect values from the input fields
+        const digit1 = document.getElementById('Digit_1').value;
+        const digit2 = document.getElementById('Digit_2').value;
+        const digit3 = document.getElementById('Digit_3').value;
+        const digit4 = document.getElementById('Digit_4').value;
+
+        // Concatenate the digits into the OTP
+        const enteredOTP = digit1 + digit2 + digit3 + digit4 + "";
+
+        console.log(enteredOTP);
+
+        if (newPassword !== confirmPassword) {
+            setVerificationStatus('Passwords do not match');
+            return;
+        }
+
         try {
-            // Collect values from the input fields
-            const digit1 = document.getElementById('Digit_1').value;
-            const digit2 = document.getElementById('Digit_2').value;
-            const digit3 = document.getElementById('Digit_3').value;
-            const digit4 = document.getElementById('Digit_4').value;
 
-            // Concatenate the digits into the OTP
-            const enteredOTP = digit1 + digit2 + digit3 + digit4 + "";
+            let req = {
+                'otp': enteredOTP,
+                'password': newPassword
+            }
 
-            console.log(enteredOTP);
-
-            // Send the concatenated OTP to the server for validation
-            const response = await fetch('http://localhost:8000/api/users/verifyOTP/', {
+            const response = await fetch('http://localhost:8000/api/users/reset_password/', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     "SID": Cookies.get('token'), // Include the token in the custom "SID" header
                 },
-                body: JSON.stringify({ otp: enteredOTP }),
+                body: JSON.stringify(req)
             });
-
             const data = await response.json();
-            console.log("men gowa handle verify", data);
-
-            //wait for data to be returned
-            if (data['message'] === 'Email is Activated') {
-                setVerificationStatus('OTP verified successfully');
-
-                //save the updated user info in local storage
-                const user = JSON.parse(localStorage.getItem('user'));
-                user.isActivated = true;
-                localStorage.setItem('user', JSON.stringify(user));
-
-                //close the modal
-                onRequestClose();
-
-                window.location.href = "/dashboard";
-            } else {
-                //keep the modal open and show the error message
-                setVerificationStatus('OTP verification failed');
-                localStorage.setItem('modalIsOpen', true);
-
-                //reset the input fields
-                document.getElementById('Digit_1').value = "";
-                document.getElementById('Digit_2').value = "";
-                document.getElementById('Digit_3').value = "";
-                document.getElementById('Digit_4').value = "";
-
-                //set focus on the first input field
-                document.getElementById('Digit_1').focus();
-
-            }
+            console.log(data);
+            window.location.reload();
         } catch (error) {
-            console.error('Error verifying OTP', error);
+            console.error('Error:', error);
         }
+
     };
 
     const sendOTP = async () => {
@@ -86,7 +73,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
 
             console.log(Cookies.get('token'));
 
-            const response = await fetch('http://localhost:8000/api/users/activate/', {
+            const response = await fetch('http://localhost:8000/api/users/email_reset/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,7 +86,6 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
         }
     };
 
-
     return (
         <Modal className={'overflow-hidden'} isOpen={isOpen} onRequestClose={onRequestClose}>
             <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-base-100 py-12">
@@ -107,7 +93,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                     <div className="mx-auto flex w-full max-w-md flex-col space-y-16">
                         <div className="flex flex-col items-center justify-center text-center space-y-2">
                             <div className="font-semibold text-3xl">
-                                <p>Email Verification</p>
+                                <p>Password Reset</p>
                             </div>
                             <div className="flex flex-row text-sm font-medium text-base-content">
                                 <p>We have sent a code to your email {userEmail}</p>
@@ -116,9 +102,37 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
 
                         <div>
                             <form>
-                                <div className="flex flex-col space-y-16">
-                                    <div className="flex flex-row items-center justify-between mx-auto w-full max-w-xs">
+                                <div className="flex flex-col space-y-12">
+                                    <div className='justify-center space-y-8'>
+                                        <div className="space-y-3">
+                                            <p className="text-base-content text-xl font-semibold">New Password</p>
+                                            <input
+                                                className="input input-bordered input-primary w-full max-w-xl"
+                                                type="password"
+                                                placeholder='Enter new password'
+                                                name=""
+                                                value={newPassword} // Bind the value to the state
+                                                onChange={(event) => setNewPassword(event.target.value)} // Handle change and update the state
+                                            />
+                                        </div>
 
+
+
+                                        <div className="space-y-3">
+                                            <p className="text-base-content text-xl font-semibold">Confirm Password</p>
+                                            <input
+                                                className="input input-bordered input-primary w-full max-w-xl"
+                                                type="password"
+                                                placeholder='Enter new password'
+                                                name=""
+                                                value={confirmPassword} // Bind the value to the state
+                                                onChange={(event) => setConfirmPassword(event.target.value)} // Handle change and update the state
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <p className="text-base-content self-center text-xl font-semibold">Enter OTP</p>
+                                    <div className="flex flex-row items-center justify-between mx-auto w-full max-w-xs">
                                         <div className="w-16 h-16 ">
                                             <input
                                                 className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-base-300 text-lg bg-base-100 focus:bg-base-200 focus:ring-1 ring-primary-focus"
@@ -156,11 +170,11 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                                                 name=""
                                                 id="Digit_4"
                                                 maxLength="1"
-                                                onInput={() => handleVerify()}
                                             />
                                         </div>
                                     </div>
                                     <div className="flex flex-col space-y-5">
+                                        <button onClick={handleReset} className="btn btn-primary w-full max-w-xs self-center">Reset Password</button>
                                         <p className='self-center'>{verificationStatus}</p>
                                         <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-base-content">
                                             <p>Didn't recieve code?</p> <button className="flex flex-row items-center text-primary" onClick={sendOTP}>Resend</button>
@@ -173,7 +187,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
                 </div>
             </div>
         </Modal>
-    );
+    )
 }
 
-export default OTPVerificationModal;
+export default ResetPasswordModal

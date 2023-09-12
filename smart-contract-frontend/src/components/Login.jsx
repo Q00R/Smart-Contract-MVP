@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import Cookies from 'js-cookie';
+
 import { loginFields } from "../constants/formFields";
 import FormAction from "./FormAction";
 import FormExtra from "./FormExtra";
@@ -10,28 +12,32 @@ let fieldsState = {};
 fields.forEach(field => fieldsState[field.id] = '');
 
 export default function Login() {
+
+
     const [loginState, setLoginState] = useState(fieldsState);
 
     const handleChange = (e) => {
-        setLoginState({ ...loginState, [e.target.id]: e.target.value })
+        setLoginState({ ...loginState, [e.target.id]: e.target.value });
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        authenticateUser();
+        await authenticateUser();
     }
 
-    //Handle Login API Integration here
-    // Handle Login API Integration here
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
     const authenticateUser = async () => {
         try {
-            // Get user details from loginState
             const input = {
                 "email": loginState['email-address'],
                 "password": loginState['password'],
             };
 
-            // Call login API
             const response = await fetch('http://localhost:8000/api/users/login/', {
                 method: 'POST',
                 headers: {
@@ -43,44 +49,31 @@ export default function Login() {
             const data = await response.json();
             console.log(data);
 
-            if (!data.is_activated) {
-                console.log("user is not active");
-                // Send OTP
-                await sendOTP();
-            } else {
-                console.log("user is active");
-                // Redirect to dashboard
-                window.location.href = "/dashboard";
+            // save user info in local storage
+            let user = {
+                "user_id": data.user.user_id,
+                "email": data.user.email,
+                "firstname": data.user.firstname,
+                "lastname": data.user.lastname,
+                "nid": data.user.nid,
+                "phone_number": data.user.phone_number,
+                "is_activated": data.is_activated,
             }
+            localStorage.setItem('user', JSON.stringify(user));
+
+            //set cookie expiration to 1 hour
+            Cookies.set('token', data.token['token'], { expires: 1 / 24 });
+            window.location.href = "/dashboard";
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
-    // Handle OTP Sending API Integration here
-    const sendOTP = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/api/users/activate/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
 
-            const data = await response.json();
-            console.log(JSON.stringify(data));
-            console.log(data);
-
-            // Show OTP verification modal
-            // document.getElementById('otp-verification-modal').style.display = 'block';
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
 
     return (
-        <form className="flex flex-col mt-8 space-y-6">
-            <div className="-sspace-y-px self-center w-1/6">
+        <form className="flex flex-col mt-8 space-y-6 p-12 m-10">
+            <div className="-sspace-y-px self-center w-full">
                 {
                     fields.map(field =>
                         <Input
@@ -99,9 +92,8 @@ export default function Login() {
                     )
                 }
                 <FormExtra />
-                {/* TODO Add I am not robot captcha */}
                 <FormAction handleSubmit={handleSubmit} text="Login" />
-                <OTPVerificationModal />
+                <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} userEmail={loginState['email-address']} />
             </div>
         </form>
     )

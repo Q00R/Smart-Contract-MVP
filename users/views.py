@@ -42,8 +42,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 # from rest_framework_jwt.views import obtain_jwt_token
 
 
-
-#lama y3mel logout delelte token
+#lama y3mel logout delete token
 #fadel nzbat lw 3mal kaza login my3odsh y3mel create le token kaza mara 
 
 # make an api/function to search on the parties and see if they have accepted or not before publishing
@@ -98,6 +97,7 @@ def activate(request):
     recipient_list = [user.email]
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
 
+
     try:
         email.send()
         return Response({'message': 'Email verification OTP sent'}, status=status.HTTP_201_CREATED)
@@ -140,7 +140,6 @@ def verify_otp(request):
     user.is_active = True
     user.save()
     saved_otp.delete()
-    
     return Response({'message': 'Email is Activated'})
 
 # deactivate account
@@ -202,7 +201,6 @@ def email_pass_reset(request):
     subject = 'Your OTP for Password reset'
     message = f'Your OTP is: {otp.otp}'
     recipient_list = [user.email]
-    print("user.email: " , user.email)
     email = EmailMessage(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
     try:
@@ -270,7 +268,6 @@ def log_in(request):
 
         # Set token expiration time
         access_token.set_exp(from_time=timezone.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
-        
         user_id = access_token.payload.get('user_id')
         firstname = access_token.payload.get('firstname')
         lastname = access_token.payload.get('lastname')
@@ -336,7 +333,6 @@ def upload_pdf(request):
             pass
         document = Documents(user=user, document_name = pdf_file.name ,document_file=compressed_pdf, document_hash=pdf_hash, is_completed=False)
         document.save()
-                
         return Response({'message': 'PDF uploaded and compressed successfully.' + message , "Doc_id":document.document_id}, status=status.HTTP_201_CREATED)
     else:
         return Response({'message': 'PDF file not provided.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -399,9 +395,6 @@ def email_add(request, doc_id):
     else:
         return Response({'message' : 'emails not added'}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-# # @custom_auth_required
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -438,14 +431,13 @@ def get_document(request, pk):
     
     return response
 
-# # @custom_auth_required
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_document_details(request, pk):
     user = request.user
     try:
-        document = Documents.objects.get(document_id=pk, user=user)
+        document = Documents.objects.get(document_id=pk)
     except Documents.DoesNotExist:
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
@@ -502,10 +494,9 @@ def review_share_doc(request, pk):
 
     return Response( ser , status=status.HTTP_200_OK)
 
-
 @api_view(['GET'])
 def example_api(request):
-    data = {'message': 'Hello from Django API!!!'}
+    data = reverse('example', kwargs={"pk" : 3})
     return Response(data)
 # # @custom_auth_required
 @api_view(['GET'])
@@ -545,7 +536,6 @@ def reject_document(request, doc_id):
     
     if not docsh_id.is_accepted == 'pending':
         return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='rejected', time_a_r = timezone.now())
     return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
 
@@ -568,12 +558,12 @@ def confirm_document(request, doc_id):
     
     return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
     
-# # @custom_auth_required
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_confirmation(request, doc_id):
     user = request.user
+
     try:
         docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
     except Document_shared.DoesNotExist:
@@ -594,11 +584,32 @@ def get_confirmation(request, doc_id):
     
     if accept:
         acc_docs = DocumentSharedSerializer(docs, many=True)
-        return Response({'message : All other parties have accepted', acc_docs}, status=status.HTTP_200_OK)
+        return Response({'message : All other parties have accepted', acc_docs.data}, status=status.HTTP_200_OK)
     
     r_docs = Document_shared.objects.filter(doc_id=doc_id, owner_id=user, is_accepted='rejected')
     rej_docs = DocumentSharedSerializer(r_docs, many=True)
-    return Response({'message : Not all other parties have accepted', rej_docs}, status=status.HTTP_200_OK)
+    return Response({'message : Not all other parties have accepted', rej_docs.data}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@custom_auth_required
+def get_all_shared(request, doc_id):
+    data = getUser(request)
+    user = data.data["user"]
+
+    try:
+        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
+        docs_ser = DocumentSharedSerializer(docs, many=True)
+        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
+    except Document_shared.DoesNotExist:
+        return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@custom_auth_required
+def get_shared_with_user(request):
+    data = getUser(request)
+    user = data.data["user"]
 
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
@@ -624,7 +635,6 @@ def get_all_shared(request, doc_id):
 @permission_classes([IsAuthenticated])
 def get_shared_with_user(request):
     user = request.user
-
     try:
         docs = Document_shared.objects.filter(parties_id=user)
         docs_ser = DocumentSharedSerializer(docs, many=True)

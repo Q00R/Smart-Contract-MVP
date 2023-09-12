@@ -103,6 +103,7 @@ class Document_shared(models.Model):
     class Meta:
         db_table = 'documents_shared'
 
+        
 class OneTimePassword(models.Model):
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
     otp = models.CharField(4)
