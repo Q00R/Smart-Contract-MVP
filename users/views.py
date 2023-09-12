@@ -567,20 +567,6 @@ def confirm_document(request, doc_id):
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='accepted', time_a_r = timezone.now())
     
     return Response({'message': 'Document accepted'}, status=status.HTTP_200_OK)
-
-
-# def getUser(request):
-#     sessionToken = get_session_token(request)
-#     #ser = SessionSerializer(sessionToken)
-#     #print("sessionToken: " , sessionToken.token)
-#     try:
-#         print("d5lt el try")
-#         session = Session.objects.get(token=sessionToken.data)
-#         user = Users.objects.get(user_id=session.user_id_id)
-        
-#         return Response({"user": user})
-#     except Session.DoesNotExist:
-#         return Response({'error': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
     
 # # @custom_auth_required
 @api_view(['GET'])
@@ -621,7 +607,12 @@ def get_all_shared(request, doc_id):
     user = request.user
 
     try:
-        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
+        document = Documents.objects.get(pk=doc_id, user=user)
+    except Documents.DoesNotExist:
+        return Response({'message' : 'Cannot find document'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        docs = Document_shared.objects.filter(doc_id = document , owner_id=user)
         docs_ser = DocumentSharedSerializer(docs, many=True)
         return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
     except Document_shared.DoesNotExist:
