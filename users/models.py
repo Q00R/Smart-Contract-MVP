@@ -66,7 +66,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
         
         
     def __str__(self):
-        return self.firstname
+        return self.email
         
         
 #add signature field to sign the Document with private key of owner (sign_document)
