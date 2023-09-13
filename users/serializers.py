@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ['user_id' , 'firstname' , 'lastname' , 'email' , 'nid' , 'phone_number']
+        fields = ['id' , 'firstname' , 'lastname' , 'email' , 'nid' , 'phone_number']
         
         
 class DocumentSerializer(serializers.ModelSerializer):

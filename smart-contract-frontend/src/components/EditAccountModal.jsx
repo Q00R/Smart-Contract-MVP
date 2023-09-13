@@ -24,7 +24,7 @@ const EditAccountModal = ({ isOpen, onRequestClose }) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                    'Authorization': `Bearer ${Cookies.get('token')}`, // Include the token in the custom "SID" header
                 },
                 body: JSON.stringify(updatedUser),
             });

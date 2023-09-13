@@ -45,7 +45,7 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                    'Authorization': `Bearer ${Cookies.get('token')}`, // Include the token in the custom "Authorization" header
                 },
             });
             const data = await response.json();
@@ -75,10 +75,10 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
             console.log(Cookies.get('token'));
 
             const response = await fetch('http://localhost:8000/api/users/activate/', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                    'Authorization': `Bearer ${Cookies.get('token')}`, // Include the token in the custom "Authorization" header
                 },
             });
 
@@ -107,10 +107,10 @@ const UserprofileCard = ({ isOpen, onRequestClose }) => {
             console.log(Cookies.get('token'));
 
             const response = await fetch('http://localhost:8000/api/users/email_reset/', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                    'Authorization': `Bearer ${Cookies.get('token')}`, // Include the token in the custom "Authorization" header
                 },
             });
             const data = await response.json();

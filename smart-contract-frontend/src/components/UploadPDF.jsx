@@ -30,7 +30,7 @@ const UploadPDF = () => {
             const response = await fetch('http://localhost:8000/api/documents/upload/', {
                 method: 'POST',
                 headers: {
-                    'SID': Cookies.get('token'),
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 },
                 body: formData, // Use the FormData object
             });
@@ -69,7 +69,7 @@ const UploadPDF = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'SID': Cookies.get('token'),
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 },
                 body: JSON.stringify({ email_list: emailList.email }), // Correct the JSON structure here
             });

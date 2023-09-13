@@ -14,7 +14,7 @@ const DownloadButton = ({ documentDownloadId, documentDownloadName, buttonClass 
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'SID': Cookies.get('token')
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 }
             });
 

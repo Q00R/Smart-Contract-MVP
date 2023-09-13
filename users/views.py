@@ -28,6 +28,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django.urls import reverse
+from django.contrib.auth.models import update_last_login
 #--------
 
 from django.shortcuts import get_object_or_404
@@ -178,7 +179,7 @@ def EditAccount(request):
     return Response({'message': 'Account updated'}) 
 
 # @custom_auth_required
-@api_view(['GET'])   
+@api_view(['POST'])   
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated]) 
 def email_pass_reset(request):
@@ -219,25 +220,20 @@ def email_pass_reset(request):
 def reset_password(request):
     
     user = request.user
-    
     user_otps = request.data.get('otp')
     if user_otps is None:
         return Response("Please provide the OTP.")
     
     if user_otps is None:
         return Response("Please provide the OTP.")
-    verified_email = user.email
-    user = get_object_or_404(Users, email=verified_email)
    
     updated_pass = request.data.get('password') #request.data['password']
     if updated_pass is None:
         return Response("Please provide the NEW Password.")
-    
     try:
         saved_otp = OneTimePassword.objects.get(user_id = user.id)
     except OneTimePassword.DoesNotExist:
         return Response("OTP not found. Please request a new OTP.")
-    
     if saved_otp.otp != user_otps:
         return Response("Invalid OTP")
     
@@ -247,9 +243,8 @@ def reset_password(request):
     
     if user.check_password(updated_pass):
         return Response({'message' : 'Cannot enter an old password'}, status=status.HTTP_400_BAD_REQUEST)
-
     user.set_password(updated_pass)
-
+    user.save()
     saved_otp.delete()
     
     return Response({'message': 'Password Reset'}, status=status.HTTP_202_ACCEPTED)
@@ -266,6 +261,7 @@ def log_in(request):
         access_token = tokens.access_token
         refresh = tokens
 
+        update_last_login(None, user)
         # Set token expiration time
         access_token.set_exp(from_time=timezone.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
         user_id = access_token.payload.get('user_id')
@@ -339,6 +335,8 @@ def upload_pdf(request):
 
 
 @api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def email_add(request, doc_id):
     user = request.user
     message = ''
@@ -359,7 +357,7 @@ def email_add(request, doc_id):
         for email in list_of_gmail:
             try:
                 party = Users.objects.get(email=email)
-                if not party.is_activated:
+                if not party.is_active:
                     # message += f'Email {party.email} is not active, '
                     not_found.append(email)
                     continue
@@ -535,6 +533,8 @@ def reject_document(request, doc_id):
         return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
     
     if not docsh_id.is_accepted == 'pending':
+        if docsh_id.is_accepted == 'rejected':
+            return Response({'message' : 'You have already rejected the contract'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='rejected', time_a_r = timezone.now())
     return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
@@ -552,6 +552,8 @@ def confirm_document(request, doc_id):
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     if not doc.is_accepted == 'pending':
+        if doc.is_accepted == 'accepted':
+            return Response({'message' : 'You have already accepted the contract'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='accepted', time_a_r = timezone.now())
@@ -592,40 +594,27 @@ def get_confirmation(request, doc_id):
 
 
 @api_view(['GET'])
-@custom_auth_required
-def get_all_shared(request, doc_id):
-    data = getUser(request)
-    user = data.data["user"]
-
-    try:
-        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
-        docs_ser = DocumentSharedSerializer(docs, many=True)
-        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
-    except Document_shared.DoesNotExist:
-        return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@custom_auth_required
-def get_shared_with_user(request):
-    data = getUser(request)
-    user = data.data["user"]
-
-@api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_all_shared(request, doc_id):
     user = request.user
-
+    email_list = []
     try:
         document = Documents.objects.get(pk=doc_id, user=user)
     except Documents.DoesNotExist:
         return Response({'message' : 'Cannot find document'}, status=status.HTTP_404_NOT_FOUND)
 
     try:
-        docs = Document_shared.objects.filter(doc_id = document , owner_id=user)
+        docs = Document_shared.objects.filter(doc_id=document, owner_id=user)
         docs_ser = DocumentSharedSerializer(docs, many=True)
-        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
+        for doc in docs:
+            try:
+                party_user = Users.objects.get(pk=doc.parties_id.id)
+                email_list.append(party_user.email)
+            except Users.DoesNotExist:
+                pass
+        print("email_list:", email_list)
+        return Response({"email_list" : email_list, "docs" : docs_ser.data}, status=status.HTTP_202_ACCEPTED)
     except Document_shared.DoesNotExist:
         return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -652,17 +641,17 @@ def generate_url(request, tmeplate_name, attribute):
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def delete_email(request , doc_id, party_id):
+def delete_email(request, doc_id, party_id):
     user = request.user
     try:
-        party = Users.objects.get(user_id=party_id)
+        party = Users.objects.get(pk=party_id)
     except Users.DoesNotExist:
         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     try:
         doc = Documents.objects.get(pk=doc_id)
     except Documents.DoesNotExist:
-        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     if doc.is_completed:
         return Response({'ERROR': 'Document is uploaded on BC.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -671,7 +660,7 @@ def delete_email(request , doc_id, party_id):
         doc_shared = Document_shared.objects.get(doc_id = doc_id, owner_id=user, parties_id=party)
         
         if not doc_shared.is_accepted == 'pending':
-            return Response({'ERROR': 'cannot remove responded USER '}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'ERROR': 'cannot remove responded USER '}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
         doc_shared.delete()
         return Response({'message' : f'Deleted {party_id.email} from contract'}, status=status.HTTP_200_OK)
@@ -692,6 +681,8 @@ def get_shared_email(request, doc_id):
     
     try :
         doc_shared = Document_shared.objects.filter(doc_id=document, owner_id=user)
+        parties_id_list = [document_shared.parties_id for document_shared in doc_shared]
+        print(parties_id_list)
     except Document_shared.DoesNotExist:
         return Response({'message' : 'You have not shared this document with anyone'}, status=status.HTTP_404_NOT_FOUND)
 
