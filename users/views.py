@@ -179,7 +179,7 @@ def EditAccount(request):
     return Response({'message': 'Account updated'}) 
 
 # @custom_auth_required
-@api_view(['GET'])   
+@api_view(['POST'])   
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated]) 
 def email_pass_reset(request):
