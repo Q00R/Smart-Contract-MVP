@@ -181,3 +181,9 @@ users/migrations/__pycache__/0012_alter_onetimepassword_timestamp.cpython-311.py
 users/migrations/__pycache__/0013_alter_onetimepassword_timestamp.cpython-311.pyc
 users/migrations/__pycache__/0014_users_password.cpython-311.pyc
 users/migrations/__pycache__/0015_alter_users_email.cpython-311.pyc
+users/migrations/__pycache__/__init__.cpython-311.pyc
+users/migrations/__pycache__/0001_initial.cpython-311.pyc
+DocuSign/__pycache__/__init__.cpython-311.pyc
+DocuSign/__pycache__/settings.cpython-311.pyc
+DocuSign/__pycache__/urls.cpython-311.pyc
+DocuSign/__pycache__/wsgi.cpython-311.pyc
