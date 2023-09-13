@@ -38,8 +38,8 @@ const Dashboard = () => {
                     colTwoHeader="Shared Parties Emails"
                     colThreeHeader="Document Status"
 
-                    colOneContent="Document Name"
-                    colTwoContent="Shared Email" // Shared Group Emails
+                    // colOneContent="Document Name"
+                    // colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
                     actionButton_1={<DownloadButton />}
@@ -64,8 +64,8 @@ const Dashboard = () => {
                     colTwoHeader="Owner Email"
                     colThreeHeader="Document Status"
 
-                    colOneContent="Document Name"
-                    colTwoContent="Shared Email" // Shared Group Emails
+                    // colOneContent="Document Name"
+                    // colTwoContent="Shared Email" // Shared Group Emails
                     colThreeContent={<div className="badge badge-success badge-xs"></div>} // Pending, Approved, Rejected
 
                     actionButton_1={<DownloadButton />}

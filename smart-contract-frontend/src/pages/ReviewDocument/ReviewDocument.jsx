@@ -63,6 +63,7 @@ const ReviewDocument = () => {
             });
 
             console.log(response);
+            window.location.href = '/dashboard';
         } catch (error) {
             console.error('Error:', error);
         }
@@ -79,6 +80,8 @@ const ReviewDocument = () => {
                 }
             });
             console.log(response);
+            window.location.href = '/dashboard';
+
         } catch (error) {
             console.error('Error:', error);
         }

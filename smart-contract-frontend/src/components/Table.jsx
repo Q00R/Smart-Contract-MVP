@@ -37,12 +37,14 @@ const Table = (props) => {
             });
             const data = await response.json();
             console.log(data);
-
             // wait for the data to be set before setting the rows
-            setOwnedDocuments((prevOwnedDocuments) => [...prevOwnedDocuments, ...data['user_documents']]);
-            setSharedDocuments((prevSharedDocuments) => [...prevSharedDocuments, ...data['shared_documents']]);
+
+
+            setOwnedDocuments(data['user_documents']);
+            setSharedDocuments(data['shared_documents']);
             setRowData(); // Call setRowData after data is set
             setIsLoading(false); // Set loading to false here
+            return data;
         } catch (error) {
             console.error('Error Loading files:', error);
         }
@@ -74,14 +76,20 @@ const Table = (props) => {
             fetch(`http://localhost:8000/api/get-shared/${documentId}/`, {
                 method: 'GET',
                 headers: {
-                    // 'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${Cookies.get('token')}`,
                 },
             }).then(response => response.json())
 
                 .then(data => {
-                    console.log("Shared Emails: ", data);
-                    return data;
+                    // console.log("Shared Ema ils: ", data);
+                    console.log("Shared Emailsssss: ", data['email_list']);
+                    let emailsString = '';
+                    for (let i = 0; i < data['email_list'].length; i++) {
+                        emailsString += data['email_list'][i] + ', ';
+                    }
+                    console.log("Emails String: ", emailsString);
+                    return emailsString;
                 });
         }
         catch (error) {
@@ -100,11 +108,10 @@ const Table = (props) => {
 
             // Create rows from the documents
             const newRows = ownedDocuments.map((document, index) => ({
-                // 
                 isChecked: false,
                 colOneContent: document.document_name,
-                colTwoContent: 2,
-                colThreeContent: 3,
+                colTwoContent: getSharedEmails(document.document_id), // Shared Group Emails
+                colThreeContent: document.is_complete,
                 actionButton_1: (
                     <GetDocumentDetailsButton
                         documentDetails={document}
@@ -119,6 +126,8 @@ const Table = (props) => {
                     />
                 ),
                 // Add other properties as needed
+
+
             }));
 
             console.log('new rows: ', newRows);
@@ -126,12 +135,29 @@ const Table = (props) => {
             setRows(newRows);
         } else {
             // Create rows from the documents
-            const newRows = sharedDocuments.map((document, index) => ({
-                isChecked: false,
-                colOneContent: 1,
-                // actionButton_1: actionButton_1,
-                // Add other properties as needed
-            }));
+
+            const newRows = sharedDocuments.map((document, index) => (
+                console.log('document: ', document),
+                {
+                    isChecked: false,
+                    colOneContent: document.doc_id,
+                    colTwoContent: document.owner_id,
+                    colThreeContent: (document) => { if (document.is_accepted) { return 'Accepted' } else { return 'Pending' } },
+                    actionButton_1: (
+                        <GetDocumentDetailsButton
+                            documentDetails={document}
+                            buttonClass="btn btn-outline btn-ghost"
+                        />
+                    ),
+                    actionButton_2: (
+                        <DownloadButton
+                            documentDownloadId={document.document_id}
+                            documentDownloadName={document.document_name}
+                            buttonClass="btn btn-outline btn-ghost"
+                        />
+                    ),
+                    // Add other properties as needed
+                }));
 
             setRows(newRows);
         }
