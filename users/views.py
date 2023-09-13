@@ -598,16 +598,23 @@ def get_confirmation(request, doc_id):
 @permission_classes([IsAuthenticated])
 def get_all_shared(request, doc_id):
     user = request.user
-
+    email_list = []
     try:
         document = Documents.objects.get(pk=doc_id, user=user)
     except Documents.DoesNotExist:
         return Response({'message' : 'Cannot find document'}, status=status.HTTP_404_NOT_FOUND)
 
     try:
-        docs = Document_shared.objects.filter(doc_id = document , owner_id=user)
+        docs = Document_shared.objects.filter(doc_id=document, owner_id=user)
         docs_ser = DocumentSharedSerializer(docs, many=True)
-        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
+        for doc in docs:
+            try:
+                party_user = Users.objects.get(pk=doc.parties_id.id)
+                email_list.append(party_user.email)
+            except Users.DoesNotExist:
+                pass
+        print("email_list:", email_list)
+        return Response({"email_list" : email_list, "docs" : docs_ser.data}, status=status.HTTP_202_ACCEPTED)
     except Document_shared.DoesNotExist:
         return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -674,6 +681,8 @@ def get_shared_email(request, doc_id):
     
     try :
         doc_shared = Document_shared.objects.filter(doc_id=document, owner_id=user)
+        parties_id_list = [document_shared.parties_id for document_shared in doc_shared]
+        print(parties_id_list)
     except Document_shared.DoesNotExist:
         return Response({'message' : 'You have not shared this document with anyone'}, status=status.HTTP_404_NOT_FOUND)
 
