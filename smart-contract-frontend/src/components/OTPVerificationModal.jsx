@@ -87,7 +87,7 @@ function OTPVerificationModal({ isOpen, onRequestClose, userEmail }) {
             console.log(Cookies.get('token'));
 
             const response = await fetch('http://localhost:8000/api/users/activate/', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${Cookies.get('token')}`// Include the token in the custom "SID" header
