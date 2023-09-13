@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/users/reset_password/' ,views.reset_password, name='reset-pass'), #reset password
     path('api/documents/upload/' ,views.upload_pdf, name='upload-doc'),
     path('api/documents/EmailAdd/<str:doc_id>/' ,views.email_add, name='add-emmail-to-doc'),
+    path('api/documents/EmailRemove/<str:doc_id>/<int:party_id>/' ,views.delete_email, name='delete-emmail-to-doc'),
     path('review-share-doc/<int:pk>/', views.review_share_doc, name='review-share-doc'),
     path('api/example/', views.example_api),
     path('api/documents/<str:pk>/retrieve/' ,views.get_document, name='get-document'),

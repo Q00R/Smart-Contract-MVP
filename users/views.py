@@ -220,25 +220,20 @@ def email_pass_reset(request):
 def reset_password(request):
     
     user = request.user
-    
     user_otps = request.data.get('otp')
     if user_otps is None:
         return Response("Please provide the OTP.")
     
     if user_otps is None:
         return Response("Please provide the OTP.")
-    verified_email = user.email
-    user = get_object_or_404(Users, email=verified_email)
    
     updated_pass = request.data.get('password') #request.data['password']
     if updated_pass is None:
         return Response("Please provide the NEW Password.")
-    
     try:
         saved_otp = OneTimePassword.objects.get(user_id = user.id)
     except OneTimePassword.DoesNotExist:
         return Response("OTP not found. Please request a new OTP.")
-    
     if saved_otp.otp != user_otps:
         return Response("Invalid OTP")
     
@@ -248,9 +243,8 @@ def reset_password(request):
     
     if user.check_password(updated_pass):
         return Response({'message' : 'Cannot enter an old password'}, status=status.HTTP_400_BAD_REQUEST)
-
     user.set_password(updated_pass)
-
+    user.save()
     saved_otp.delete()
     
     return Response({'message': 'Password Reset'}, status=status.HTTP_202_ACCEPTED)
@@ -599,9 +593,6 @@ def get_confirmation(request, doc_id):
     return Response({'message : Not all other parties have accepted', rej_docs.data}, status=status.HTTP_200_OK)
 
 
-
-
-
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -643,17 +634,17 @@ def generate_url(request, tmeplate_name, attribute):
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def delete_email(request , doc_id, party_id):
+def delete_email(request, doc_id, party_id):
     user = request.user
     try:
-        party = Users.objects.get(user_id=party_id)
+        party = Users.objects.get(pk=party_id)
     except Users.DoesNotExist:
         return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     try:
         doc = Documents.objects.get(pk=doc_id)
     except Documents.DoesNotExist:
-        return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     if doc.is_completed:
         return Response({'ERROR': 'Document is uploaded on BC.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -662,7 +653,7 @@ def delete_email(request , doc_id, party_id):
         doc_shared = Document_shared.objects.get(doc_id = doc_id, owner_id=user, parties_id=party)
         
         if not doc_shared.is_accepted == 'pending':
-            return Response({'ERROR': 'cannot remove responded USER '}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'ERROR': 'cannot remove responded USER '}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
         doc_shared.delete()
         return Response({'message' : f'Deleted {party_id.email} from contract'}, status=status.HTTP_200_OK)
