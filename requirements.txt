@@ -8,7 +8,7 @@ charset-normalizer==3.2.0
 colorama==0.4.6
 cryptography==41.0.3
 Deprecated==1.2.14
-Django==4.2.4
+Django==4.2.5
 django-cors-headers==4.2.0
 djangorestframework==3.14.0
 djangorestframework-jwt==1.11.0
