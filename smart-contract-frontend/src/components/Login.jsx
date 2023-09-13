@@ -62,7 +62,7 @@ export default function Login() {
             localStorage.setItem('user', JSON.stringify(user));
 
             //set cookie expiration to 1 hour
-            Cookies.set('token', data.token['token'], { expires: 1 / 24 });
+            Cookies.set('token', data.token.access, { expires: 1 / 24 });
             window.location.href = "/dashboard";
         } catch (error) {
             console.error('Error:', error);

@@ -32,8 +32,6 @@ const Navbar = () => {
 
         // Redirect to home page
         window.location.href = '/';
-
-
     };
 
     const handleOpenModal = () => {

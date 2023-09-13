@@ -52,7 +52,7 @@ const Table = (props) => {
             await fetch('http://localhost:8000/api/users/documents/', {
                 method: 'GET',
                 headers: {
-                    'SID': Cookies.get('token'),
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 },
             }).then(response => response.json())
                 .then(data => {
@@ -76,7 +76,7 @@ const Table = (props) => {
             fetch('http://localhost:8000/api/documents/' + documentId + '/retrieve_details/', {
                 method: 'GET',
                 headers: {
-                    'SID': Cookies.get('token'),
+                    'Authorization': `Bearer ${Cookies.get('token')}`,
                 },
             }).then(response => response.json())
                 .then(data => {

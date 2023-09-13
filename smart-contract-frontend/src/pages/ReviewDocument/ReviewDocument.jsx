@@ -20,7 +20,7 @@ const ReviewDocument = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'SID': Cookies.get('token')
+                        'Authorization': `Bearer ${Cookies.get('token')}`
                     }
                 });
 
@@ -58,7 +58,7 @@ const ReviewDocument = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'SID': Cookies.get('token')
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 }
             });
 
@@ -75,7 +75,7 @@ const ReviewDocument = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'SID': Cookies.get('token')
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 }
             });
             console.log(response);

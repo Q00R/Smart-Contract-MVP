@@ -54,7 +54,7 @@ const ResetPasswordModal = ({ isOpen, onRequestClose, userEmail }) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                    'Authorization': `Bearer ${Cookies.get('token')}`
                 },
                 body: JSON.stringify(req)
             });
@@ -77,7 +77,7 @@ const ResetPasswordModal = ({ isOpen, onRequestClose, userEmail }) => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    "SID": Cookies.get('token'), // Include the token in the custom "SID" header
+                    'Authorization': `Bearer ${Cookies.get('token')}` // Include the token in the custom "Authorization" header
                 },
             });
             const data = await response.json();
