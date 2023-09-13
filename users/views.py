@@ -591,25 +591,8 @@ def get_confirmation(request, doc_id):
     return Response({'message : Not all other parties have accepted', rej_docs.data}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@custom_auth_required
-def get_all_shared(request, doc_id):
-    data = getUser(request)
-    user = data.data["user"]
-
-    try:
-        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
-        docs_ser = DocumentSharedSerializer(docs, many=True)
-        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
-    except Document_shared.DoesNotExist:
-        return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['GET'])
-@custom_auth_required
-def get_shared_with_user(request):
-    data = getUser(request)
-    user = data.data["user"]
 
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
