@@ -28,6 +28,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django.urls import reverse
+from django.contrib.auth.models import update_last_login
 #--------
 
 from django.shortcuts import get_object_or_404
@@ -266,6 +267,7 @@ def log_in(request):
         access_token = tokens.access_token
         refresh = tokens
 
+        update_last_login(None, user)
         # Set token expiration time
         access_token.set_exp(from_time=timezone.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
         user_id = access_token.payload.get('user_id')
@@ -339,6 +341,8 @@ def upload_pdf(request):
 
 
 @api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def email_add(request, doc_id):
     user = request.user
     message = ''
@@ -359,7 +363,7 @@ def email_add(request, doc_id):
         for email in list_of_gmail:
             try:
                 party = Users.objects.get(email=email)
-                if not party.is_activated:
+                if not party.is_active:
                     # message += f'Email {party.email} is not active, '
                     not_found.append(email)
                     continue
@@ -535,6 +539,8 @@ def reject_document(request, doc_id):
         return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
     
     if not docsh_id.is_accepted == 'pending':
+        if docsh_id.is_accepted == 'rejected':
+            return Response({'message' : 'You have already rejected the contract'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='rejected', time_a_r = timezone.now())
     return Response({'message' : 'Document rejected'}, status=status.HTTP_202_ACCEPTED)
@@ -552,6 +558,8 @@ def confirm_document(request, doc_id):
         return Response({'message': 'Document not found.'}, status=status.HTTP_404_NOT_FOUND)
     
     if not doc.is_accepted == 'pending':
+        if doc.is_accepted == 'accepted':
+            return Response({'message' : 'You have already accepted the contract'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return Response({'message' : 'Cannot change your response'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
     Document_shared.objects.filter(doc_id=doc_id, parties_id=user).update(is_accepted='accepted', time_a_r = timezone.now())
@@ -591,25 +599,8 @@ def get_confirmation(request, doc_id):
     return Response({'message : Not all other parties have accepted', rej_docs.data}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@custom_auth_required
-def get_all_shared(request, doc_id):
-    data = getUser(request)
-    user = data.data["user"]
-
-    try:
-        docs = Document_shared.objects.filter(doc_id = doc_id , owner_id=user)
-        docs_ser = DocumentSharedSerializer(docs, many=True)
-        return Response(docs_ser.data, status=status.HTTP_202_ACCEPTED)
-    except Document_shared.DoesNotExist:
-        return Response({'message' : 'You have not shared this document with any other user'}, status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view(['GET'])
-@custom_auth_required
-def get_shared_with_user(request):
-    data = getUser(request)
-    user = data.data["user"]
 
 @api_view(['GET'])
 @authentication_classes([CustomJWTAuthentication])
