@@ -16,6 +16,7 @@ export default function Signup() {
     //set the initial state of the form
     const [signupState, setSignupState] = useState(fieldsState);
 
+    const [error, setError] = useState(''); // Added error state
 
     //set the initial state of the modal
     const [isModalOpen, setIsModalOpen] = useState(localStorage.getItem('modalIsOpen') === 'true' ? true : false);
@@ -31,6 +32,20 @@ export default function Signup() {
 
         //prevent the default form behaviour
         e.preventDefault();
+
+        // Check for missing inputs
+        const missingInputs = fields.filter(
+            (field) => field.isRequired && !signupState[field.id]
+        );
+
+        if (missingInputs.length > 0) {
+            // Display an error message for missing inputs
+            setError('Please fill in all required fields.');
+            return; // Prevent further processing
+        }
+
+        // Clear any previous errors
+        setError('');
 
         //log the form data
         console.log(signupState)
@@ -127,7 +142,7 @@ export default function Signup() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${Cookies.get('token')}`// Include the token in the custom "Authorization" header
+                    // Include the token in the custom "Authorization" header
                 },
             });
 
@@ -165,6 +180,7 @@ export default function Signup() {
                     )
                 }
                 <FormAction handleSubmit={handleSubmit} text="Sign up" />
+                {error && <div className="text-red-500">{error}</div>} {/* Display error message */}
                 <OTPVerificationModal isOpen={isModalOpen} onRequestClose={handleCloseModal} userEmail={signupState['email-address']} />
             </div>
         </form>
