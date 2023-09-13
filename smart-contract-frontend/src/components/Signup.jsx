@@ -19,7 +19,7 @@ export default function Signup() {
     const [error, setError] = useState(''); // Added error state
 
     //set the initial state of the modal
-    const [isModalOpen, setIsModalOpen] = useState(localStorage.getItem('modalIsOpen') === 'true' ? true : false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     //handle input change
     const handleChange = (e) => setSignupState({ ...signupState, [e.target.id]: e.target.value });
@@ -60,12 +60,6 @@ export default function Signup() {
 
     //handle Signup API Integration here
     const createAccount = () => {
-        //talk to the django backend, create a user account
-
-        //if successful, redirect to login page
-        //if not, display error message
-
-        //get the data from the form
         const data = {
             "firstname": signupState['first-name'],
             "lastname": signupState['last-name'],
@@ -94,6 +88,10 @@ export default function Signup() {
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
+                if (data['error']) {
+                    setError(data['error']);
+                    return;
+                }
                 login();
             })
             .catch((error) => {
@@ -123,7 +121,7 @@ export default function Signup() {
                     "is_activated": data.is_activated,
                 }
                 localStorage.setItem('user', JSON.stringify(user));
-                Cookies.set('token', data.token['token'], { expires: 1 / 24 });
+                Cookies.set('token', data.token.access, { expires: 1 / 24 });
                 sendOTP();
             }
             )
@@ -139,10 +137,10 @@ export default function Signup() {
             console.log(Cookies.get('token'));
 
             const response = await fetch('http://localhost:8000/api/users/activate/', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Include the token in the custom "Authorization" header
+                    'Authorization': `Bearer ${Cookies.get('token')}`,
                 },
             });
 
